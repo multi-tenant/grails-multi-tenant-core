@@ -1,0 +1,25 @@
+<plugin name='multi-tenant' version='0.1' grailsVersion='1.1 &gt; *'>
+  <author>Eric Martineau</author>
+  <authorEmail>ericm@infusionsoft.com</authorEmail>
+  <title>Multi-Tenant Plugin</title>
+  <description>\
+Allows for managing data for mutiple 'tenants' in a single database by using a tenantId column for each domain object.  Also handles
+the proxying of spring beans for a multi-tenant environment.
+</description>
+  <documentation>http://grails.org/MultiTenant+Plugin</documentation>
+  <resources>
+    <resource>tenant.DomainTenantMapController</resource>
+    <resource>spring.resources</resource>
+    <resource>BootStrap</resource>
+    <resource>TenantClassInjector</resource>
+    <resource>DataSource</resource>
+    <resource>Config</resource>
+    <resource>TenantFilters</resource>
+    <resource>BuildConfig</resource>
+    <resource>UrlMappings</resource>
+    <resource>tenant.DomainTenantMap</resource>
+  </resources>
+  <dependencies>
+    <plugin name='falconeUtil' version='0.1' />
+  </dependencies>
+</plugin>
