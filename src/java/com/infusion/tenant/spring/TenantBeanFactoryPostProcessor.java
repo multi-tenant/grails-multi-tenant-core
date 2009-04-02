@@ -11,6 +11,7 @@ import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.PropertyValue;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.aop.framework.ProxyFactoryBean;
+import org.springframework.core.Ordered;
 import org.codehaus.groovy.grails.commons.spring.RuntimeSpringConfiguration;
 import org.codehaus.groovy.grails.commons.spring.DefaultRuntimeSpringConfiguration;
 import org.codehaus.groovy.grails.commons.spring.BeanConfiguration;
@@ -22,7 +23,7 @@ import com.infusion.tenant.hibernate.TenantConfigurableSessionFactoryBean;
  * Examines all spring beans after all definitions have been loaded by the container, and converts
  * multiTenant beans to use the spring aop proxies.  This code executes before ANY beans are initialized.
  */
-public class TenantBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
+public class TenantBeanFactoryPostProcessor implements BeanFactoryPostProcessor, Ordered {
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
         //This cast exposes you bean registration capabilities
         DefaultListableBeanFactory applicationContext = (DefaultListableBeanFactory) beanFactory;
@@ -65,12 +66,9 @@ public class TenantBeanFactoryPostProcessor implements BeanFactoryPostProcessor 
                 applicationContext.registerBeanDefinition(beanName, proxiedBean.getBeanDefinition());
             }
         }
+    }
 
-
-        //Handle SessionFactory
-        final BeanDefinition sessionFactoryBeanDefinition = applicationContext.getBeanDefinition("sessionFactory");
-        sessionFactoryBeanDefinition.setBeanClassName(TenantConfigurableSessionFactoryBean.class.getName());
-
-
+    public int getOrder() {
+        return 10;
     }
 }

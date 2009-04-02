@@ -9,14 +9,8 @@ the proxying of spring beans for a multi-tenant environment.
   <documentation>http://grails.org/MultiTenant+Plugin</documentation>
   <resources>
     <resource>tenant.DomainTenantMapController</resource>
-    <resource>spring.resources</resource>
-    <resource>BootStrap</resource>
     <resource>TenantClassInjector</resource>
-    <resource>DataSource</resource>
-    <resource>Config</resource>
     <resource>TenantFilters</resource>
-    <resource>BuildConfig</resource>
-    <resource>UrlMappings</resource>
     <resource>tenant.DomainTenantMap</resource>
   </resources>
   <dependencies>

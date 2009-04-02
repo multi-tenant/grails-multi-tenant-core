@@ -17,7 +17,7 @@ public class DomainNamePropertyTenantResolver extends BaseDomainNameTenantResolv
 
   public void initialize() {
     hosts.clear();
-    Map domainTenants = ConfigurationHolder.config.tenant.mapping.flatten()
+    Map domainTenants = ConfigurationHolder.config.tenant.domainMapping.flatten()
     hosts.putAll(domainTenants);
   }
 

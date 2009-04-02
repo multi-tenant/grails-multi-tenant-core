@@ -2,10 +2,7 @@ package com.infusion.tenant.event;
 
 
 /**
- * Created by IntelliJ IDEA.
- * User: eric
- * Date: Mar 21, 2009
- * Time: 7:36:50 PM
+ * This class is used whenever a tenant id is changed.
  */
 public class TenantChangedEvent {
     public final Integer oldTenant;
