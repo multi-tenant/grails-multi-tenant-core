@@ -23,7 +23,7 @@ import com.infusion.tenant.datasource.TenantDataSourcePostProcessor
 import com.infusion.tenant.datasource.PropertyDataSourceUrlResolver
 
 class MultiTenantGrailsPlugin {
-  def version = 0.1 
+  def version = 0.2 
   def dependsOn = [falconeUtil:0.1]
   def author = "Eric Martineau"
   def authorEmail = "ericm@infusionsoft.com"
