@@ -31,8 +31,8 @@ import org.hibernate.criterion.Expression
 import com.infusion.tenant.CurrentTenantThreadLocal
 
 class MultiTenantGrailsPlugin {
-  def version = 0.3
-  def dependsOn = [falconeUtil: 0.2]
+  def version = 0.4
+  def dependsOn = [falconeUtil: 0.3]
   def author = "Eric Martineau"
   def authorEmail = "ericm@infusionsoft.com"
   def title = "Multi-Tenant Plugin"
@@ -83,25 +83,21 @@ the proxying of spring beans for a multi-tenant environment.
   }
 
   def doWithEvents = {
-    ctx->
+    ctx ->
     if (ConfigurationHolder.config.tenant.mode != "singleTenant") {
-      "hibernate.criteriaCreated" {
-        filterTenant() {
-          Criteria criteria, broker ->
-          final Integer tenant = ctx.currentTenant.get();
-          if (tenant != null && tenant > 0) {
-            criteria.add(Expression.eq("tenantId", tenant));
-          }
+      hibernate.criteriaCreated("tenantFilter") {
+        Criteria criteria ->
+        final Integer tenant = ctx.currentTenant.get();
+        if (tenant != null && tenant > 0) {
+          criteria.add(Expression.eq("tenantId", tenant));
         }
       }
 
-      "hibernate.queryCreated" {
-        filterTenant() {
-          Query query, broker ->
-          for (String param: query.getNamedParameters()) {
-            if ("tenantId".equals(param)) {
-              query.setParameter("tenantId", ctx.currentTenant.get(), new IntegerType());
-            }
+      "hibernate.queryCreated"("tenantFilter") {
+        Query query ->
+        for (String param: query.getNamedParameters()) {
+          if ("tenantId".equals(param)) {
+            query.setParameter("tenantId", ctx.currentTenant.get(), new IntegerType());
           }
         }
       }
