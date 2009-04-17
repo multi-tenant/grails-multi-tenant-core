@@ -8,8 +8,6 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
-import org.springframework.beans.PropertyValue;
-import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.core.Ordered;
 import org.codehaus.groovy.grails.commons.spring.RuntimeSpringConfiguration;
@@ -17,7 +15,6 @@ import org.codehaus.groovy.grails.commons.spring.DefaultRuntimeSpringConfigurati
 import org.codehaus.groovy.grails.commons.spring.BeanConfiguration;
 import org.codehaus.groovy.grails.commons.GrailsClassUtils;
 import com.infusion.util.CollectionUtil;
-import com.infusion.tenant.hibernate.TenantConfigurableSessionFactoryBean;
 
 /**
  * Examines all spring beans after all definitions have been loaded by the container, and converts

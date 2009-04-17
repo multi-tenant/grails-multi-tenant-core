@@ -1,9 +1,9 @@
 package com.infusion.tenant;
 
 /**
- * Class to store and locate the current tenant.  Stores in a threadlocal variable.
+ * Basic implementation that stores the current tenant in a threadlocal variable.
  */
-public class TenantUtils {
+public class CurrentTenantThreadLocal implements CurrentTenant {
 // ========================================================================================================================
 //    Static Fields
 // ========================================================================================================================
@@ -11,20 +11,19 @@ public class TenantUtils {
     private static ThreadLocal<Integer> currentTenant = new ThreadLocal<Integer>();
 
 // ========================================================================================================================
-//    Static Methods
+//    Public Instance Methods
 // ========================================================================================================================
 
-    public static Integer getCurrentTenant() {
+    public Integer get() {
         Integer rtn = currentTenant.get();
-        if(rtn == null) {
+        if (rtn == null) {
             currentTenant.set(0);
             rtn = 0;
         }
         return rtn;
     }
 
-    public static void setCurrentTenant(Integer tenantId) {
+    public void set(Integer tenantId) {
         currentTenant.set(tenantId);
     }
 }
-

@@ -1,10 +1,7 @@
-import com.infusion.tenant.TenantUtils
+import com.infusion.tenant.CurrentTenant
 import com.infusion.tenant.TenantResolver
-import com.infusion.util.event.groovy.GroovyEventBroker
 import com.infusion.tenant.event.TenantChangedEvent
 import com.infusion.util.event.groovy.GroovyEventBroker
-import com.infusion.util.event.groovy.GroovyEventBroker
-import com.infusion.tenant.TenantUtils
 
 /**
  * Filters used to check for tenancy.
@@ -13,6 +10,7 @@ public class TenantFilters {
 
   TenantResolver tenantResolver
   GroovyEventBroker eventBroker
+  CurrentTenant currentTenant
 
   def filters = {
     //This filter allows you to set the current tenant directly from the request.  Eventually, it will
@@ -25,6 +23,7 @@ public class TenantFilters {
       }
     }
 
+    def loaded = []
     if (tenantResolver != null) {
       tenantIdentifier(controller: "*", action: "*") {
         before = {
@@ -33,9 +32,16 @@ public class TenantFilters {
           if (tenantId != null && tenantId > 0) {
             session.tenantId = tenantId
             //Set the current tenant in case event handlers
-            TenantUtils.setCurrentTenant tenantId
+            currentTenant.set tenantId
+            TenantChangedEvent event = new TenantChangedEvent(oldTenantId, tenantId)
+            if (!loaded.contains(tenantId)) {
+              loaded << event.newTenant
+              eventBroker?.publish("newTenant", event)
+            }
             if (oldTenantId != tenantId) {
-              eventBroker?.publish("tenantChanged", new TenantChangedEvent(oldTenantId, tenantId));
+
+              eventBroker?.publish("tenantChanged", event);
+
             }
           }
         }
@@ -46,9 +52,9 @@ public class TenantFilters {
     tenantFilter(controller: '*', action: '*') {
       before = {
         //Always set to 0 to start
-        TenantUtils.setCurrentTenant 0
+        currentTenant.set 0
         if (session.tenantId) {
-          TenantUtils.setCurrentTenant session.tenantId
+          currentTenant.set session.tenantId
         }
       }
 
@@ -56,7 +62,7 @@ public class TenantFilters {
         //If the current tenant was set anywhere during the execution, pick it up and set it here.
         //Kinda dangerous, but we had to do it for the acegi integration
         if (session.tenantId == null || session.tenantId == 0) {
-          session.tenantId = TenantUtils.getCurrentTenant()
+          session.tenantId = currentTenant.get()
         }
 
         //Had to remove this because it was getting called BEFORE sitemesh...  so the sitemesh stuff was bombing

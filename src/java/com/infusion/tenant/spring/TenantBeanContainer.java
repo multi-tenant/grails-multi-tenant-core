@@ -1,13 +1,12 @@
 package com.infusion.tenant.spring;
 
-import com.infusion.tenant.TenantUtils;
-
-import java.util.Map;
-import java.util.HashMap;
-
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ApplicationContext;
+import com.infusion.tenant.CurrentTenant;
 import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Container that holds an instance of a bean for each tenant in your system.
@@ -26,6 +25,11 @@ public class TenantBeanContainer implements ApplicationContextAware {
      * The store for all beans, by beanName->tenantId
      */
     private Map<String, Map<Integer, Object>> beans = new HashMap<String, Map<Integer, Object>>();
+
+    /**
+     * This class knows what the current tenant is
+     */
+    private CurrentTenant currentTenant;
 
 // ========================================================================================================================
 //    Public Instance Methods
@@ -46,15 +50,15 @@ public class TenantBeanContainer implements ApplicationContextAware {
      */
     public Object getBean(String beanName) {
         final Object rtn;
-        Integer currentTenant = TenantUtils.getCurrentTenant();
+        Integer currentTenantId = currentTenant.get();
 
         final Map<Integer, Object> beansByTenant = getBeansByName(beanName);
 
-        if (!beansByTenant.containsKey(currentTenant)) {
+        if (!beansByTenant.containsKey(currentTenantId)) {
             rtn = applicationContext.getBean(beanName);
-            beansByTenant.put(currentTenant, rtn);
+            beansByTenant.put(currentTenantId, rtn);
         } else {
-            rtn = beansByTenant.get(currentTenant);
+            rtn = beansByTenant.get(currentTenantId);
         }
 
         return rtn;
@@ -62,6 +66,10 @@ public class TenantBeanContainer implements ApplicationContextAware {
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
+    }
+
+    public void setCurrentTenant(CurrentTenant currentTenant) {
+        this.currentTenant = currentTenant;
     }
 
 // ========================================================================================================================

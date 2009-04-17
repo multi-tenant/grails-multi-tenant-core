@@ -22,7 +22,7 @@ public class TenantDataSourcePostProcessor implements BeanFactoryPostProcessor, 
 
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
         final BeanDefinition beanDefinition = beanFactory.getBeanDefinition("dataSource");
-        beanDefinition.setBeanClassName(TenantDataSource.class.getName());
+        beanDefinition.setBeanClassName(TenantDataSourceImpl.class.getName());
         beanDefinition.setAutowireCandidate(true);
         beanDefinition.getPropertyValues().addPropertyValue("dataSourceUrlResolver", new RuntimeBeanReference("dataSourceUrlResolver"));
     }

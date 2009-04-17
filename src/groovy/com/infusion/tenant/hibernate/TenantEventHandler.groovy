@@ -1,30 +1,11 @@
 package com.infusion.tenant.hibernate
 
-import org.hibernate.event.PreDeleteEvent
-import com.infusion.tenant.TenantUtils
-import org.hibernate.event.PostLoadEvent
-import org.hibernate.event.PreDeleteEvent
-import org.codehaus.groovy.grails.orm.hibernate.support.ClosureEventTriggeringInterceptor
-import org.hibernate.event.SaveOrUpdateEvent
-import com.infusion.tenant.TenantUtils
-import org.hibernate.event.PreLoadEvent
+import com.infusion.tenant.CurrentTenant
 import org.hibernate.SessionFactory
-import org.hibernate.event.EventListeners
-import org.hibernate.event.LoadEventListener
-import org.hibernate.event.PreLoadEventListener
-import org.hibernate.event.PreDeleteEventListener
-import org.hibernate.event.PreInsertEventListener
-import org.hibernate.event.PreUpdateEventListener
-import org.hibernate.event.PreInsertEvent
-import org.hibernate.event.PreUpdateEvent
-import org.hibernate.EntityMode
-import org.hibernate.event.LoadEvent
 import org.hibernate.event.LoadEventListener.LoadType
-import org.hibernate.event.SaveOrUpdateEventListener
 import org.hibernate.tuple.StandardProperty
 import util.hibernate.HibernateEventUtil
-import org.codehaus.groovy.grails.orm.hibernate.ConfigurableLocalSessionFactoryBean
-import com.infusion.tenant.TenantUtils
+import org.hibernate.event.*
 
 /**
  * Class to inject hibernate events that validate multi-tenancy.
@@ -34,6 +15,8 @@ PreUpdateEventListener {
 
   public TenantEventHandler() {
   }
+
+  CurrentTenant currentTenant
 
 
   public void setSessionFactory(SessionFactory factory) {
@@ -47,7 +30,7 @@ PreUpdateEventListener {
     boolean shouldFail = false;
     Integer setTenantId = preInsertEvent.getEntity().tenantId
     if (setTenantId == 0 || setTenantId == null) {
-      int currentTenant = TenantUtils.getCurrentTenant()
+      int currentTenant = currentTenant.get()
       preInsertEvent.getEntity().tenantId = currentTenant;
       StandardProperty[] properties = preInsertEvent.getPersister().getEntityMetamodel().getProperties()
       int found=-1;
@@ -62,7 +45,7 @@ PreUpdateEventListener {
         preInsertEvent.getState()[found] = currentTenant;
       }
     } else {
-      if (setTenantId != TenantUtils.getCurrentTenant()) {
+      if (setTenantId != currentTenant.get()) {
         println "Failed Insert Because TenantId Doesn't Match"
         return true;
       }
@@ -73,7 +56,7 @@ PreUpdateEventListener {
   public boolean onPreUpdate(PreUpdateEvent preUpdateEvent) {
     boolean shouldFail = false;
     Integer setTenantId = preUpdateEvent.getEntity().tenantId
-    if (setTenantId != TenantUtils.getCurrentTenant()) {
+    if (setTenantId != currentTenant.get()) {
       println "Failed Update Because TenantId Doesn't Match"
       shouldFail = true;
     }
@@ -84,9 +67,9 @@ PreUpdateEventListener {
     Object result = event.getResult()
     if (result != null) {
       Integer loaded = result.tenantId
-      int currentTenant = TenantUtils.getCurrentTenant()
+      int currentTenant = currentTenant.get()
       if (loaded != currentTenant && !event.isAssociationFetch()) {
-        println "Trying to load record from a different app (should be ${TenantUtils.getCurrentTenant()} but was ${loaded})"
+        println "Trying to load record from a different app (should be ${currentTenant} but was ${loaded})"
         event.setResult null
       }
     }
@@ -98,7 +81,7 @@ PreUpdateEventListener {
   public boolean onPreDelete(PreDeleteEvent event) {
     boolean shouldFail = false;
     Integer setTenantId = event.getEntity().tenantId
-    if (setTenantId != TenantUtils.getCurrentTenant()) {
+    if (setTenantId != currentTenant.get()) {
       println "Failed Delete Because TenantId Doesn't Match"
       shouldFail = true;
     }
