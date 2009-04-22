@@ -31,7 +31,7 @@ import org.hibernate.criterion.Expression
 import com.infusion.tenant.CurrentTenantThreadLocal
 
 class MultiTenantGrailsPlugin {
-  def version = 0.4
+  def version = 0.5
   def dependsOn = [falconeUtil: 0.3]
   def author = "Eric Martineau"
   def authorEmail = "ericm@infusionsoft.com"

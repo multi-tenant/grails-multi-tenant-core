@@ -25,5 +25,6 @@ public class TenantDataSourcePostProcessor implements BeanFactoryPostProcessor, 
         beanDefinition.setBeanClassName(TenantDataSourceImpl.class.getName());
         beanDefinition.setAutowireCandidate(true);
         beanDefinition.getPropertyValues().addPropertyValue("dataSourceUrlResolver", new RuntimeBeanReference("dataSourceUrlResolver"));
+        beanDefinition.getPropertyValues().addPropertyValue("currentTenant", new RuntimeBeanReference("currentTenant"));
     }
 }
