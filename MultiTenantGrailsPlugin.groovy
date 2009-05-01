@@ -29,10 +29,11 @@ import org.hibernate.Query
 import org.hibernate.type.IntegerType
 import org.hibernate.criterion.Expression
 import com.infusion.tenant.CurrentTenantThreadLocal
+import com.infusion.tenant.DomainNameDatabaseTenantResolver
 
 class MultiTenantGrailsPlugin {
-  def version = 0.5
-  def dependsOn = [falconeUtil: 0.3]
+  def version = 0.6
+  def dependsOn = [falconeUtil: 0.4]
   def author = "Eric Martineau"
   def authorEmail = "ericm@infusionsoft.com"
   def title = "Multi-Tenant Plugin"
@@ -45,19 +46,21 @@ the proxying of spring beans for a multi-tenant environment.
 
   def doWithSpring = {
 
-    currentTenant(CurrentTenantThreadLocal)
 
     if (ConfigurationHolder.config.tenant.mode == "singleTenant") {
 
       //Put switching datasource here
       tenantDataSourcePostProcessor(TenantDataSourcePostProcessor)
 
-      //This is the default - can be overridden
+      //This is the default - can be overridden, mapping between tenants and datasource urls
+      //are set up in Config.groovy
       dataSourceUrlResolver(PropertyDataSourceUrlResolver)
 
     } else {
 
       //This registers hibernate events that force filtering on domain classes
+      //In single tenant mode, the records are automatically filtered by different
+      //data sources.
       tenantEventHandler(TenantEventHandler) {
         sessionFactory = ref("sessionFactory")
         currentTenant = ref("currentTenant")
@@ -72,28 +75,40 @@ the proxying of spring beans for a multi-tenant environment.
     //The post-processor does bean modification for multi-tenant beans
     tenantBeanFactoryPostProcessor(TenantBeanFactoryPostProcessor)
 
-    //Default tenant resolver is a property file.  This can be easily overridden
-    tenantResolver(DomainNamePropertyTenantResolver)
+    if (ConfigurationHolder.config.tenant.resolver.type == "request"
+      || ConfigurationHolder.config.tenant.resolver.type == null) {
+      //This implementation
+      currentTenant(CurrentTenantThreadLocal){
+        eventBroker = ref("eventBroker")
+      }
 
+      if (ConfigurationHolder.config.tenant.resolver.request.dns.type == "config") {
+        //Default tenant resolver is a property file.  This can be easily overridden
+        tenantResolver(DomainNamePropertyTenantResolver)
+      } else if (ConfigurationHolder.config.tenant.resolver.request.dns.type == "db") {
+        tenantResolver(DomainNameDatabaseTenantResolver)
+      }
+    }
+
+    //This bean adds the current tenantId to all logs
     multiTenantLogLayout(MultiTenantLogLayout) {
       currentTenant = ref("currentTenant")
     }
-
-
   }
 
   def doWithEvents = {
     ctx ->
     if (ConfigurationHolder.config.tenant.mode != "singleTenant") {
+      
+      //Listen for criteria created events
       hibernate.criteriaCreated("tenantFilter") {
         Criteria criteria ->
         final Integer tenant = ctx.currentTenant.get();
-        if (tenant != null && tenant > 0) {
-          criteria.add(Expression.eq("tenantId", tenant));
-        }
+        criteria.add(Expression.eq("tenantId", tenant));
       }
 
-      "hibernate.queryCreated"("tenantFilter") {
+      //Listen for query created events
+      hibernate.queryCreated("tenantFilter") {
         Query query ->
         for (String param: query.getNamedParameters()) {
           if ("tenantId".equals(param)) {
@@ -102,7 +117,6 @@ the proxying of spring beans for a multi-tenant environment.
         }
       }
     }
-
   }
 
   def doWithApplicationContext = {GrailsApplicationContext applicationContext ->

@@ -1,4 +1,4 @@
-<plugin name='multi-tenant' version='0.5' grailsVersion='1.1 &gt; *'>
+<plugin name='multi-tenant' version='0.6' grailsVersion='1.1 &gt; *'>
   <author>Eric Martineau</author>
   <authorEmail>ericm@infusionsoft.com</authorEmail>
   <title>Multi-Tenant Plugin</title>
@@ -8,12 +8,12 @@ the proxying of spring beans for a multi-tenant environment.
 </description>
   <documentation>http://grails.org/MultiTenant+Plugin</documentation>
   <resources>
-    <resource>tenant.DomainTenantMapController</resource>
     <resource>TenantClassInjector</resource>
     <resource>TenantFilters</resource>
+    <resource>tenant.DomainTenantMapController</resource>
     <resource>tenant.DomainTenantMap</resource>
   </resources>
   <dependencies>
-    <plugin name='falconeUtil' version='0.3' />
+    <plugin name='falconeUtil' version='0.4' />
   </dependencies>
 </plugin>

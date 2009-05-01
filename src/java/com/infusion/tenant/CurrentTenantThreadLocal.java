@@ -1,5 +1,11 @@
 package com.infusion.tenant;
 
+import com.infusion.util.event.EventBroker;
+import com.infusion.tenant.event.TenantChangedEvent;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Basic implementation that stores the current tenant in a threadlocal variable.
  */
@@ -9,6 +15,9 @@ public class CurrentTenantThreadLocal implements CurrentTenant {
 // ========================================================================================================================
 
     private static ThreadLocal<Integer> currentTenant = new ThreadLocal<Integer>();
+
+    private EventBroker eventBroker;
+    private List<Integer> loaded = new ArrayList<Integer>();
 
 // ========================================================================================================================
 //    Public Instance Methods
@@ -23,7 +32,20 @@ public class CurrentTenantThreadLocal implements CurrentTenant {
         return rtn;
     }
 
-    public void set(Integer tenantId) {
-        currentTenant.set(tenantId);
+    public void set(Integer newTenantId) {
+        Integer oldTenantId = get();
+        if (!oldTenantId.equals(newTenantId)) {
+            currentTenant.set(newTenantId);
+            final TenantChangedEvent changedEvent = new TenantChangedEvent(oldTenantId, newTenantId);
+            eventBroker.publish("tenantChanged", changedEvent);
+            if (!loaded.contains(newTenantId)) {
+                loaded.add(newTenantId);
+                eventBroker.publish("newTenant", changedEvent);
+            }
+        }
+    }
+
+    public void setEventBroker(EventBroker eventBroker) {
+        this.eventBroker = eventBroker;
     }
 }
