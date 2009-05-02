@@ -32,7 +32,7 @@ import com.infusion.tenant.CurrentTenantThreadLocal
 import com.infusion.tenant.DomainNameDatabaseTenantResolver
 
 class MultiTenantGrailsPlugin {
-  def version = 0.6
+  def version = 0.7
   def dependsOn = [falconeUtil: 0.4]
   def author = "Eric Martineau"
   def authorEmail = "ericm@infusionsoft.com"
@@ -76,13 +76,16 @@ the proxying of spring beans for a multi-tenant environment.
     tenantBeanFactoryPostProcessor(TenantBeanFactoryPostProcessor)
 
     if (ConfigurationHolder.config.tenant.resolver.type == "request"
-      || ConfigurationHolder.config.tenant.resolver.type == null) {
+      || ConfigurationHolder.config.tenant.resolver.type.size() == 0) {
       //This implementation
       currentTenant(CurrentTenantThreadLocal){
         eventBroker = ref("eventBroker")
       }
 
-      if (ConfigurationHolder.config.tenant.resolver.request.dns.type == "config") {
+      if (
+        ConfigurationHolder.config.tenant.resolver.request.dns.type == "config" ||
+        ConfigurationHolder.config.tenant.resolver.request.dns.type.size() == 0
+      ) {
         //Default tenant resolver is a property file.  This can be easily overridden
         tenantResolver(DomainNamePropertyTenantResolver)
       } else if (ConfigurationHolder.config.tenant.resolver.request.dns.type == "db") {
