@@ -14,7 +14,7 @@ public class CurrentTenantThreadLocal implements CurrentTenant {
 //    Static Fields
 // ========================================================================================================================
 
-    private static ThreadLocal<Integer> currentTenant = new ThreadLocal<Integer>();
+    private ThreadLocal<Integer> currentTenant = new ThreadLocal<Integer>();
 
     private EventBroker eventBroker;
     private List<Integer> loaded = new ArrayList<Integer>();
@@ -37,10 +37,12 @@ public class CurrentTenantThreadLocal implements CurrentTenant {
         if (!oldTenantId.equals(newTenantId)) {
             currentTenant.set(newTenantId);
             final TenantChangedEvent changedEvent = new TenantChangedEvent(oldTenantId, newTenantId);
-            eventBroker.publish("tenantChanged", changedEvent);
-            if (!loaded.contains(newTenantId)) {
-                loaded.add(newTenantId);
-                eventBroker.publish("newTenant", changedEvent);
+            if (eventBroker != null) {
+                eventBroker.publish("tenantChanged", changedEvent);
+                if (!loaded.contains(newTenantId)) {
+                    loaded.add(newTenantId);
+                    eventBroker.publish("newTenant", changedEvent);
+                }
             }
         }
     }

@@ -22,6 +22,7 @@ import com.infusion.util.CollectionUtil;
  */
 public class TenantBeanFactoryPostProcessor implements BeanFactoryPostProcessor, Ordered {
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+
         //This cast exposes you bean registration capabilities
         DefaultListableBeanFactory applicationContext = (DefaultListableBeanFactory) beanFactory;
 
