@@ -33,7 +33,7 @@ import com.infusion.tenant.CurrentTenantThreadLocal
 import com.infusion.tenant.DomainNameDatabaseTenantResolver
 
 class MultiTenantGrailsPlugin {
-  def version = 0.8
+  def version = 0.9
   def dependsOn = [falconeUtil: 0.5]
   def author = "Eric Martineau"
   def authorEmail = "ericm@infusionsoft.com"

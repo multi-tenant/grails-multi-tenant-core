@@ -1,19 +1,23 @@
 package com.infusion.tenant;
 
-import tenant.DomainTenantMap
+
 import com.infusion.util.event.EventBroker
 import com.infusion.util.event.groovy.GroovyEventBroker
-import com.infusion.util.domain.event.HibernateEvent;
+import com.infusion.util.domain.event.HibernateEvent
+import org.springframework.context.ApplicationContext
+import org.springframework.context.ApplicationContextAware;
 
 /**
  * Implementation that looks up tenantIds from a local table DomainTenantMap that stores domain name to tenantId mappings. 
  */
-public class DomainNameDatabaseTenantResolver extends BaseDomainNameTenantResolver {
+public class DomainNameDatabaseTenantResolver extends BaseDomainNameTenantResolver implements ApplicationContextAware {
 
   /**
    * Used for listening to save events for DomainTenantMap domain class
    */
   GroovyEventBroker eventBroker
+  ApplicationContext applicationContext
+
 
   public DomainNameDatabaseTenantResolver() {
   }
@@ -33,12 +37,11 @@ public class DomainNameDatabaseTenantResolver extends BaseDomainNameTenantResolv
 
   public void initialize() {
     hosts.clear()
-    //This will load all domain tenants, regardless of where they came from
-    Collection<DomainTenantMap> list = DomainTenantMap.findAll("from tenant.DomainTenantMap");
-    list.each {DomainTenantMap map ->
+    //This will load all domain tenants, regardless of which tenant they're for
+    def list = applicationContext.getBean("tenant.DomainTenantMap").findAll("from tenant.DomainTenantMap");
+    list.each {map ->
       hosts.put(map.domainName, map.mappedTenantId)
     }
   }
-
 
 }
