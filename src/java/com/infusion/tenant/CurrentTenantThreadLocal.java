@@ -47,6 +47,10 @@ public class CurrentTenantThreadLocal implements CurrentTenant {
         }
     }
 
+    public void resetLoadedCache() {
+        this.loaded.clear();
+    }
+
     public void setEventBroker(EventBroker eventBroker) {
         this.eventBroker = eventBroker;
     }

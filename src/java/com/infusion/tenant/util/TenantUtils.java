@@ -1,7 +1,10 @@
 package com.infusion.tenant.util;
 
 import com.infusion.tenant.CurrentTenant;
+import com.infusion.tenant.groovy.compiler.MultiTenant;
 import groovy.lang.Closure;
+
+import java.lang.annotation.Annotation;
 
 /**
  * Class that provides convenience methods for dealing with the multi-tenant plugin
@@ -9,6 +12,14 @@ import groovy.lang.Closure;
 public class TenantUtils {
     private static CurrentTenant currentTenant;
 
+    /**
+     * This method allows you to temporarily switch tenants to perform some operations.  Before
+     * the method exits, it will set the tenantId back to what it was before.
+     *
+     * @param tenantId
+     * @param closure
+     * @throws Throwable
+     */
     public static void doWithTenant(Integer tenantId, Closure closure) throws Throwable {
         Integer currentTenantId = currentTenant.get();
         currentTenant.set(tenantId);
@@ -29,4 +40,25 @@ public class TenantUtils {
     public void setCurrentTenant(CurrentTenant currentTenant) {
         this.currentTenant = currentTenant;
     }
+
+    /**
+     * Whether or not a particular class is annotated as MultiTenant
+     *
+     * @param aClass
+     * @return
+     */
+    public static boolean isAnnotated(Class aClass) {
+        boolean hasAnnotation = false;
+        if (aClass != null) {
+            Annotation[] annotations = aClass.getAnnotations();
+            for (Annotation annotation : annotations) {
+                if (annotation instanceof MultiTenant) {
+                    hasAnnotation = true;
+                    break;
+                }
+            }
+        }
+        return hasAnnotation;
+    }
 }
+

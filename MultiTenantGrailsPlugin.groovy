@@ -1,40 +1,27 @@
-import com.infusion.tenant.hibernate.TenantEventHandler
-import com.infusion.util.domain.event.hibernate.InterceptableSessionFactory
-import com.infusion.tenant.spring.TenantBeanContainer
-import com.infusion.tenant.util.TenantUtils
-import com.infusion.tenant.spring.TenantMethodInterceptor
-import org.codehaus.groovy.grails.commons.GrailsClassUtils
-import org.codehaus.groovy.grails.commons.spring.BeanConfiguration
-import org.codehaus.groovy.grails.commons.spring.DefaultRuntimeSpringConfiguration
-import org.codehaus.groovy.grails.commons.spring.GrailsApplicationContext
-import org.codehaus.groovy.grails.commons.spring.RuntimeSpringConfiguration
-import org.hibernate.SessionFactory
-import org.springframework.aop.framework.ProxyFactoryBean
-import org.springframework.beans.factory.config.BeanDefinition
-import org.springframework.beans.factory.config.RuntimeBeanReference
-import org.codehaus.groovy.grails.validation.NullableConstraint
-import org.codehaus.groovy.grails.validation.ConstrainedProperty
-import org.springframework.beans.factory.config.BeanFactoryPostProcessor
-import com.infusion.tenant.spring.TenantBeanFactoryPostProcessor
-import org.codehaus.groovy.grails.commons.DefaultGrailsDomainClass
-import com.infusion.tenant.DomainNamePropertyTenantResolver
-import com.infusion.util.event.spring.InterceptableSessionFactoryPostProcessor
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
-import com.infusion.tenant.datasource.TenantDataSourcePostProcessor
-import com.infusion.tenant.datasource.PropertyDataSourceUrlResolver
-import org.apache.log4j.Logger
-import com.infusion.util.log.MultiTenantLogLayout
-import org.apache.log4j.Appender
-import org.hibernate.Criteria
-import org.hibernate.Query
-import org.hibernate.type.IntegerType
-import org.hibernate.criterion.Expression
 import com.infusion.tenant.CurrentTenantThreadLocal
 import com.infusion.tenant.DomainNameDatabaseTenantResolver
+import com.infusion.tenant.DomainNamePropertyTenantResolver
+import com.infusion.tenant.datasource.PropertyDataSourceUrlResolver
+import com.infusion.tenant.datasource.TenantDataSourcePostProcessor
+import com.infusion.tenant.hibernate.TenantEventHandler
+import com.infusion.tenant.spring.TenantBeanContainer
+import com.infusion.tenant.spring.TenantBeanFactoryPostProcessor
+import com.infusion.tenant.util.TenantUtils
+import com.infusion.util.domain.event.hibernate.CriteriaContext
+import com.infusion.util.log.MultiTenantLogLayout
+import org.apache.log4j.Appender
+import org.apache.log4j.Logger
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import org.codehaus.groovy.grails.commons.DefaultGrailsDomainClass
+import org.codehaus.groovy.grails.commons.spring.GrailsApplicationContext
+import org.codehaus.groovy.grails.validation.ConstrainedProperty
+import org.hibernate.Query
+import org.hibernate.criterion.Expression
+import org.hibernate.type.IntegerType
 
 class MultiTenantGrailsPlugin {
-  def version = 0.9
-  def dependsOn = [falconeUtil: 0.5]
+  def version = 0.10
+  def dependsOn = [falconeUtil: 0.6]
   def author = "Eric Martineau"
   def authorEmail = "ericm@infusionsoft.com"
   def title = "Multi-Tenant Plugin"
@@ -110,10 +97,12 @@ the proxying of spring beans for a multi-tenant environment.
 
       //Listen for criteria created events
       hibernate.criteriaCreated("tenantFilter") {
-        Criteria criteria ->
-
-        final Integer tenant = ctx.currentTenant.get();
-        criteria.add(Expression.eq("tenantId", tenant));
+        CriteriaContext context ->
+        boolean hasAnnotation = TenantUtils.isAnnotated(context.entityClass)
+        if (context.entityClass == null || hasAnnotation) {
+          final Integer tenant = ctx.currentTenant.get();
+          context.criteria.add(Expression.eq("tenantId", tenant));
+        }
       }
 
       //Listen for query created events

@@ -15,5 +15,5 @@ import java.lang.annotation.Retention;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @GroovyASTTransformationClass("com.infusion.tenant.groovy.compiler.TenantASTTransformation")
-public @interface   MultiTenant {
+public @interface MultiTenant {
 }

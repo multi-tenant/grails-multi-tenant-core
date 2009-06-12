@@ -3,6 +3,7 @@ import com.infusion.tenant.TenantResolver
 import com.infusion.tenant.event.TenantChangedEvent
 import com.infusion.util.event.groovy.GroovyEventBroker
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import com.infusion.tenant.TenantStatusChecker
 
 
 /**
@@ -13,6 +14,8 @@ public class TenantFilters {
   TenantResolver tenantResolver
   GroovyEventBroker eventBroker
   CurrentTenant currentTenant
+  TenantStatusChecker tenantStatusChecker
+
 
   def filters = {
     //This filter allows you to set the current tenant directly from the request.  Eventually, it will
@@ -25,7 +28,8 @@ public class TenantFilters {
       }
     }
 
-    if (ConfigurationHolder.config.tenant.resolver.type == "request") {
+    if (ConfigurationHolder.config.tenant.resolver.type == "request"
+     || ConfigurationHolder.config.tenant.resolver.type.size() == 0) {
       tenantIdentifier(controller: "*", action: "*") {
         before = {
           Integer tenantId = tenantResolver?.getTenantFromRequest(request)
@@ -34,15 +38,25 @@ public class TenantFilters {
             //session.tenantId = tenantId
 
             //Set the current tenant in case event handlers
-            currentTenant.set tenantId
+            currentTenant?.set tenantId
           }
         }
       }
     }
 
-    tenantStatusCheck(controller: "*", action: "*") {
-      before = {
-
+    if (tenantStatusChecker != null) {
+      tenantStatusCheck(controller: "*", action: "*") {
+        before = {
+          if (!["login", "logout"].contains(controllerName)) {
+            Integer currentTenant = currentTenant.get()
+            if (currentTenant && currentTenant > 0) {
+              boolean status = tenantStatusChecker.checkTenantStatus(currentTenant)
+              if (!status) {
+                redirect(uri: "/noaccess.gsp")
+              }
+            }
+          }
+        }
       }
     }
 

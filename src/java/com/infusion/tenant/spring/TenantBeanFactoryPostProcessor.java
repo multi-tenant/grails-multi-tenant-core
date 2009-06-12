@@ -14,6 +14,7 @@ import org.codehaus.groovy.grails.commons.spring.RuntimeSpringConfiguration;
 import org.codehaus.groovy.grails.commons.spring.DefaultRuntimeSpringConfiguration;
 import org.codehaus.groovy.grails.commons.spring.BeanConfiguration;
 import org.codehaus.groovy.grails.commons.GrailsClassUtils;
+import org.apache.log4j.Logger;
 import com.infusion.util.CollectionUtil;
 
 /**
@@ -21,6 +22,9 @@ import com.infusion.util.CollectionUtil;
  * multiTenant beans to use the spring aop proxies.  This code executes before ANY beans are initialized.
  */
 public class TenantBeanFactoryPostProcessor implements BeanFactoryPostProcessor, Ordered {
+
+    Logger log = Logger.getLogger(TenantBeanFactoryPostProcessor.class.getName());
+
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 
         //This cast exposes you bean registration capabilities
@@ -31,13 +35,18 @@ public class TenantBeanFactoryPostProcessor implements BeanFactoryPostProcessor,
         for (String beanName : applicationContext.getBeanDefinitionNames()) {
             BeanDefinition oldBeanDef = applicationContext.getBeanDefinition(beanName);
 
+            if(oldBeanDef.getBeanClassName() == null) {
+                continue;
+            }
             //Attempt to load the class so I can tell whether or not to proxy this bean.  Load
             //the class because we need to examine a static property.
             Class clazz = null;
             try {
                 clazz = TenantBeanFactoryPostProcessor.class.getClassLoader().loadClass(oldBeanDef.getBeanClassName());
-            } catch (ClassNotFoundException e) {
-                throw new FatalBeanException("Error running postprocessor", e);
+            } catch (Exception e) {
+                log.error("Unabled to load class for " + oldBeanDef.getBeanClassName());
+                continue;
+                //throw new FatalBeanException("Error running postprocessor", e);
             }
             Boolean isHandler = (Boolean) GrailsClassUtils.getStaticPropertyValue(clazz, "multiTenant");
             if (isHandler != null && isHandler) {
