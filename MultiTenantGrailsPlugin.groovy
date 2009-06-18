@@ -18,9 +18,10 @@ import org.codehaus.groovy.grails.validation.ConstrainedProperty
 import org.hibernate.Query
 import org.hibernate.criterion.Expression
 import org.hibernate.type.IntegerType
+import com.infusion.tenant.datasource.DatabaseDatasourceUrlResolver
 
 class MultiTenantGrailsPlugin {
-  def version = 0.10
+  def version = 0.11
   def dependsOn = [falconeUtil: 0.6]
   def author = "Eric Martineau"
   def authorEmail = "ericm@infusionsoft.com"
@@ -44,10 +45,20 @@ the proxying of spring beans for a multi-tenant environment.
       //Put switching datasource here
       tenantDataSourcePostProcessor(TenantDataSourcePostProcessor)
 
-      //This is the default - can be overridden, mapping between tenants and datasource urls
-      //are set up in Config.groovy
-      dataSourceUrlResolver(PropertyDataSourceUrlResolver)
+      if (
+        ConfigurationHolder.config.tenant.datasourceResolver.type == "config" ||
+                ConfigurationHolder.config.tenant.datasourceResolver.type.size() == 0
+      ) {
 
+        dataSourceUrlResolver(PropertyDataSourceUrlResolver)
+
+      } else {
+
+        dataSourceUrlResolver(DatabaseDatasourceUrlResolver)  {
+          eventBroker = ref("eventBroker")
+        }
+      }
+      
     } else {
 
       //This registers hibernate events that force filtering on domain classes
@@ -118,12 +129,17 @@ the proxying of spring beans for a multi-tenant environment.
   }
 
   def doWithApplicationContext = {GrailsApplicationContext applicationContext ->
-    Enumeration<Appender> appenders = Logger.getRootLogger().getAllAppenders()
-    if (appenders != null) {
-      while (appenders.hasMoreElements()) {
-        appenders.nextElement().setLayout(applicationContext.multiTenantLogLayout)
+    if (ConfigurationHolder.config.tenant.log.size() == 0 ||
+            ConfigurationHolder.config.tenant.log == true) {
+      Enumeration<Appender> appenders = Logger.getRootLogger().getAllAppenders()
+      if (appenders != null) {
+        while (appenders.hasMoreElements()) {
+          appenders.nextElement().setLayout(applicationContext.multiTenantLogLayout)
+        }
       }
     }
+
+
   }
 
   def doWithWebDescriptor = {xml ->

@@ -30,7 +30,7 @@ public class TenantFilters {
 
     if (ConfigurationHolder.config.tenant.resolver.type == "request"
      || ConfigurationHolder.config.tenant.resolver.type.size() == 0) {
-      tenantIdentifier(controller: "*", action: "*") {
+      tenantIdentifier(uri: "/**") {
         before = {
           Integer tenantId = tenantResolver?.getTenantFromRequest(request)
           if (tenantId != null && tenantId > 0) {

@@ -5,15 +5,15 @@ target(main: "This will create the default domain class") {
 
 
   ant.mkdir(dir: 'grails-app/domain/tenant')
-  new File("grails-app/domain/tenant/DomainTenantMap.groovy").write('''
+  new File("grails-app/domain/tenant/DataSourceTenantMap.groovy").write('''
 package tenant
 
 /**
- * Maps domain name to tenantId
+ * Maps data source name to tenantId
  */
-class DomainTenantMap {
+class DataSourceTenantMap {
 
-  String domainName
+  String dataSource
   Integer mappedTenantId
 
   static constraints = {}

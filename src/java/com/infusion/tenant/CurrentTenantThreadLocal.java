@@ -14,7 +14,7 @@ public class CurrentTenantThreadLocal implements CurrentTenant {
 //    Static Fields
 // ========================================================================================================================
 
-    private ThreadLocal<Integer> currentTenant = new ThreadLocal<Integer>();
+    static ThreadLocal<Integer> currentTenant = new ThreadLocal<Integer>();
 
     private EventBroker eventBroker;
     private List<Integer> loaded = new ArrayList<Integer>();

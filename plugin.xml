@@ -1,4 +1,4 @@
-<plugin name='multi-tenant' version='0.10' grailsVersion='1.1 &gt; *'>
+<plugin name='multi-tenant' version='0.11' grailsVersion='1.1 &gt; *'>
   <author>Eric Martineau</author>
   <authorEmail>ericm@infusionsoft.com</authorEmail>
   <title>Multi-Tenant Plugin</title>
