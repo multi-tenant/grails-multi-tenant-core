@@ -5,6 +5,7 @@ import com.infusion.tenant.datasource.PropertyDataSourceUrlResolver
 import com.infusion.tenant.datasource.TenantDataSourcePostProcessor
 import com.infusion.tenant.hibernate.TenantEventHandler
 import com.infusion.tenant.spring.TenantBeanContainer
+import com.infusion.tenant.MultiTenantFilter
 import com.infusion.tenant.spring.TenantBeanFactoryPostProcessor
 import com.infusion.tenant.util.TenantUtils
 import com.infusion.util.domain.event.hibernate.CriteriaContext
@@ -19,10 +20,13 @@ import org.hibernate.Query
 import org.hibernate.criterion.Expression
 import org.hibernate.type.IntegerType
 import com.infusion.tenant.datasource.DatabaseDatasourceUrlResolver
+import util.ConfigHelper
+import org.codehaus.groovy.grails.plugins.GrailsPlugin
+import org.codehaus.groovy.grails.plugins.DefaultGrailsPluginManager
 
 class MultiTenantGrailsPlugin {
-  def version = 0.11
-  def dependsOn = [falconeUtil: 0.6]
+  def version = 0.12
+  def dependsOn = [falconeUtil: 0.7]
   def author = "Eric Martineau"
   def authorEmail = "ericm@infusionsoft.com"
   def title = "Multi-Tenant Plugin"
@@ -30,6 +34,7 @@ class MultiTenantGrailsPlugin {
 Allows for managing data for mutiple 'tenants' in a single database by using a tenantId column for each domain object.  Also handles
 the proxying of spring beans for a multi-tenant environment.
 '''
+  
   // URL to the plugin's documentation
   def documentation = "http://grails.org/MultiTenant+Plugin"
 
@@ -54,11 +59,11 @@ the proxying of spring beans for a multi-tenant environment.
 
       } else {
 
-        dataSourceUrlResolver(DatabaseDatasourceUrlResolver)  {
+        dataSourceUrlResolver(DatabaseDatasourceUrlResolver) {
           eventBroker = ref("eventBroker")
         }
       }
-      
+
     } else {
 
       //This registers hibernate events that force filtering on domain classes
@@ -78,21 +83,21 @@ the proxying of spring beans for a multi-tenant environment.
     //The post-processor does bean modification for multi-tenant beans
     tenantBeanFactoryPostProcessor(TenantBeanFactoryPostProcessor)
 
-    if (ConfigurationHolder.config.tenant.resolver.type == "request"
-            || ConfigurationHolder.config.tenant.resolver.type.size() == 0) {
+    def resolverType = ConfigHelper.get("request") {it.tenant.resolver.type}
+    if (resolverType == "request") {
       //This implementation
       currentTenant(CurrentTenantThreadLocal) {
         eventBroker = ref("eventBroker")
       }
 
-      if (
-        ConfigurationHolder.config.tenant.resolver.request.dns.type == "config" ||
-                ConfigurationHolder.config.tenant.resolver.request.dns.type.size() == 0
-      ) {
+      def requestResolverType = ConfigHelper.get("config") {it.tenant.resolver.request.dns.type}
+      if (requestResolverType == "config") {
         //Default tenant resolver is a property file.  This can be easily overridden
         tenantResolver(DomainNamePropertyTenantResolver)
       } else if (ConfigurationHolder.config.tenant.resolver.request.dns.type == "db") {
-        tenantResolver(DomainNameDatabaseTenantResolver)
+        tenantResolver(DomainNameDatabaseTenantResolver) {
+          eventBroker = ref("eventBroker")
+        }
       }
     }
 
@@ -129,8 +134,9 @@ the proxying of spring beans for a multi-tenant environment.
   }
 
   def doWithApplicationContext = {GrailsApplicationContext applicationContext ->
-    if (ConfigurationHolder.config.tenant.log.size() == 0 ||
-            ConfigurationHolder.config.tenant.log == true) {
+    def logValue = ConfigHelper.get(true) {it.tenant.log}
+    if (logValue) {
+      log.info "Setting up multi-tenant logging format"
       Enumeration<Appender> appenders = Logger.getRootLogger().getAllAppenders()
       if (appenders != null) {
         while (appenders.hasMoreElements()) {
@@ -138,11 +144,55 @@ the proxying of spring beans for a multi-tenant environment.
         }
       }
     }
-
-
   }
 
   def doWithWebDescriptor = {xml ->
+    def resolverFromConfig = ConfigHelper.get("request") {it.tenant.resolver.type}
+    if (resolverFromConfig == "request") {
+
+      //Add filter definition to web.xml
+      def filterElements = xml.'filter'[0]
+      filterElements + {
+        'filter' {
+          'filter-name'("MultiTenantFilter")
+          'filter-class'(MultiTenantFilter.class.getName())
+        }
+      }
+
+      //This is what we'll be adding filter mappings to
+      def filterMappingElements = xml.'filter-mapping'[0]
+
+      //Look in plugins for urls patterns
+      DefaultGrailsPluginManager grailsManager = (DefaultGrailsPluginManager) manager;
+      grailsManager.getAllPlugins().each {
+        GrailsPlugin plugin ->
+        if (plugin.getInstance().getProperties().containsKey("multiTenantFilterUrls")) {
+          List urls = plugin.getInstance().multiTenantFilterUrls
+          urls.each {url ->
+            log.info "Adding ${url} to multitenant request filter mappings from ${plugin}"
+            filterMappingElements + {
+              'filter-mapping' {
+                'filter-name'("MultiTenantFilter")
+                'url-pattern'("${url}")
+              }
+            }
+          }
+        }
+      }
+
+      def urls = ConfigHelper.get(null) {it.tenant.filterUrls}
+      urls?.each {url ->
+        log.info "Adding ${url} to multitenant request mappings from Config.groovy"
+        filterMappingElements + {
+          'filter-mapping' {
+            'filter-name'("MultiTenantFilter")
+            'url-pattern'("${url}")
+          }
+        }
+      }
+
+      log.info "Finished mapping filter urls"
+    }
   }
 
   def doWithDynamicMethods = {ctx ->

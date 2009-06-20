@@ -4,6 +4,7 @@ import com.infusion.tenant.event.TenantChangedEvent
 import com.infusion.util.event.groovy.GroovyEventBroker
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import com.infusion.tenant.TenantStatusChecker
+import util.ConfigHelper
 
 
 /**
@@ -28,9 +29,9 @@ public class TenantFilters {
       }
     }
 
-    if (ConfigurationHolder.config.tenant.resolver.type == "request"
-     || ConfigurationHolder.config.tenant.resolver.type.size() == 0) {
-      tenantIdentifier(uri: "/**") {
+    def requestConfigSetting = ConfigHelper.get("request") {it.tenant.resolver.type}
+    if(requestConfigSetting == "request") {
+      tenantIdentifier(controller: "*", action: "*") {
         before = {
           Integer tenantId = tenantResolver?.getTenantFromRequest(request)
           if (tenantId != null && tenantId > 0) {
