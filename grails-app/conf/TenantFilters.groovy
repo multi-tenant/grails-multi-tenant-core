@@ -31,7 +31,7 @@ public class TenantFilters {
 
     def requestConfigSetting = ConfigHelper.get("request") {it.tenant.resolver.type}
     if(requestConfigSetting == "request") {
-      tenantIdentifier(controller: "*", action: "*") {
+      tenantIdentifier(controller: "*", action: "*") {                                                                                                                                              
         before = {
           Integer tenantId = tenantResolver?.getTenantFromRequest(request)
           if (tenantId != null && tenantId > 0) {

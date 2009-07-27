@@ -41,6 +41,9 @@ public class MultiTenantFilter implements Filter {
         currentTenant?.set tenantId
       }
     }
+    filterChain.doFilter(servletRequest, servletResponse)
+    //Unset the currentTenant at the end of the request
+    currentTenant?.set 0
   }
 
   public void destroy() {
