@@ -22,6 +22,8 @@ public class TenantDataSourceImpl extends DriverManagerDataSource implements Ten
      */
     DataSourceUrlResolver dataSourceUrlResolver;
 
+    public static boolean multiTenant = true;
+
 // ========================================================================================================================
 //    Public Instance Methods
 // ========================================================================================================================
@@ -32,7 +34,8 @@ public class TenantDataSourceImpl extends DriverManagerDataSource implements Ten
             throw new IllegalArgumentException("Unable to load data source url resolver.  Make sure you" +
                     " have a spring bean that implements DataSourceUrlResolver, named dataSourceUrlResolver");
         }
-        String dataSourceUrl = dataSourceUrlResolver.getDataSourceUrl(currentTenant.get());
+        Integer tenantId = currentTenant.get();
+        String dataSourceUrl = dataSourceUrlResolver.getDataSourceUrl(tenantId);
         if (dataSourceUrl == null) {
             dataSourceUrl = super.getUrl();
         }

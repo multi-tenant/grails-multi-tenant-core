@@ -25,8 +25,8 @@ import org.codehaus.groovy.grails.plugins.GrailsPlugin
 import org.codehaus.groovy.grails.plugins.DefaultGrailsPluginManager
 
 class MultiTenantGrailsPlugin {
-  def version = 0.14
-  def dependsOn = [falconeUtil: 0.7]
+  def version = 0.15
+  def dependsOn = [falconeUtil: 0.8]
   def author = "Eric Martineau"
   def authorEmail = "ericm@infusionsoft.com"
   def title = "Multi-Tenant Plugin"
@@ -37,6 +37,8 @@ the proxying of spring beans for a multi-tenant environment.
   
   // URL to the plugin's documentation
   def documentation = "http://grails.org/MultiTenant+Plugin"
+
+
 
   def doWithSpring = {
 
@@ -196,6 +198,7 @@ the proxying of spring beans for a multi-tenant environment.
   }
 
   def doWithDynamicMethods = {ctx ->
+
     if (ConfigurationHolder.config.tenant.mode != "singleTenant") {
       //Add a nullable contraint for tenantId.
       application.domainClasses.each {DefaultGrailsDomainClass domainClass ->
@@ -205,6 +208,8 @@ the proxying of spring beans for a multi-tenant environment.
         }
       }
     }
+
+    TenantUtils.ready = true
   }
 
 

@@ -6,12 +6,15 @@ import groovy.lang.Closure;
 
 import java.lang.annotation.Annotation;
 
+import org.hibernate.SessionFactory;
+
 /**
  * Class that provides convenience methods for dealing with the multi-tenant plugin
  */
 public class TenantUtils {
     private static CurrentTenant currentTenant;
-
+    private static SessionFactory sessionFactory;
+    public static boolean ready = false;
     /**
      * This method allows you to temporarily switch tenants to perform some operations.  Before
      * the method exits, it will set the tenantId back to what it was before.
@@ -39,6 +42,19 @@ public class TenantUtils {
 
     public void setCurrentTenant(CurrentTenant currentTenant) {
         this.currentTenant = currentTenant;
+    }
+
+    public void setSessionFactory(SessionFactory sessionFactory) {
+        TenantUtils.sessionFactory = sessionFactory;
+    }
+
+    public static
+    Integer getCurrentTenant() {
+        if(currentTenant != null) {
+            return currentTenant.get();
+        } else {
+            return 0;
+        }
     }
 
     /**

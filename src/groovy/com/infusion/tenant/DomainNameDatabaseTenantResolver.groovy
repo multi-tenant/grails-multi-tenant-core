@@ -6,7 +6,7 @@ import com.infusion.util.event.groovy.GroovyEventBroker
 import com.infusion.util.domain.event.HibernateEvent
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
-import org.apache.log4j.Logger;
+import org.apache.log4j.Logger
 
 /**
  * Implementation that looks up tenantIds from a local table DomainTenantMap that stores domain name to tenantId mappings. 
@@ -14,7 +14,7 @@ import org.apache.log4j.Logger;
 public class DomainNameDatabaseTenantResolver extends BaseDomainNameTenantResolver implements ApplicationContextAware {
 
   private static Logger log = Logger.getLogger(getClass());
-
+  
   /**
    * Used for listening to save events for DomainTenantMap domain class
    */
@@ -40,6 +40,7 @@ public class DomainNameDatabaseTenantResolver extends BaseDomainNameTenantResolv
   }
 
   public void initialize() {
+
     hosts.clear()
     log.info "Reloading resolver"
     //This will load all domain tenants, regardless of which tenant they're for
