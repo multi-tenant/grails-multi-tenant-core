@@ -19,21 +19,29 @@ import org.codehaus.groovy.ast.expr.ConstantExpression
  * I'm leaving it in the project in case someone wants to use the modded version of grails.  It makes it so
  * you don't have to annotate EVERY domain class.
  */
-public class TenantClassInjector implements ClassInjector {
+public class TenantClassInjector implements ClassInjector
+{
+    private static final Log LOG = LogFactory.getLog(TenantClassInjector.class);
 
-  private static final Log LOG = LogFactory.getLog(TenantClassInjector.class);
-
-  public void performInjection(SourceUnit source, GeneratorContext context, ClassNode classNode) {
-    final boolean hasTenantId = GrailsASTUtils.hasOrInheritsProperty(classNode, "tenantId");
-    if (!hasTenantId) {
-      System.out.println("[GrailsDomainInjector] Adding property [tenantId] to class [" + classNode.getName() + "]");
-      classNode.addProperty("tenantId", Modifier.PUBLIC, new ClassNode(Integer.class), new ConstantExpression(0), null, null);
+    public void performInjection(SourceUnit source, GeneratorContext context, ClassNode classNode)
+    {
+        performInjection(source, classNode)
     }
-  }
+
+    public void performInjection(SourceUnit source, ClassNode classNode)
+    {
+        final boolean hasTenantId = GrailsASTUtils.hasOrInheritsProperty(classNode, "tenantId");
+        if (!hasTenantId)
+        {
+            System.out.println("[GrailsDomainInjector] Adding property [tenantId] to class [" + classNode.getName() + "]");
+            classNode.addProperty("tenantId", Modifier.PUBLIC, new ClassNode(Integer.class), new ConstantExpression(0), null, null);
+        }
+    }
 
 
-  public boolean shouldInject(URL url) {
-    System.out.println("\t[GrailsDomainInjector] " + url + ":" + GrailsResourceUtils.isDomainClass(url))
-    return GrailsResourceUtils.isDomainClass(url);
-  }
+    public boolean shouldInject(URL url)
+    {
+        System.out.println("\t[GrailsDomainInjector] " + url + ":" + GrailsResourceUtils.isDomainClass(url))
+        return GrailsResourceUtils.isDomainClass(url);
+    }
 }
