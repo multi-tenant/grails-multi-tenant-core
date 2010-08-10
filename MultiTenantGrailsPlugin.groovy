@@ -27,8 +27,8 @@ import org.codehaus.groovy.grails.plugins.DefaultGrailsPluginManager
 class MultiTenantGrailsPlugin {
   def version = "0.18-SNAPSHOT"
   def dependsOn = [falconeUtil: 0.8]
-  def author = "Eric Martineau"
-  def authorEmail = "ericm@infusionsoft.com"
+  def author = "Eric Martineau, Scott Ryan"
+  def authorEmail = "ericm@infusionsoft.com, scott@theryansplace.com"
   def title = "Multi-Tenant Plugin"
   def description = '''\\
 Allows for managing data for mutiple 'tenants' in a single database by using a tenantId column for each domain object.  Also handles
