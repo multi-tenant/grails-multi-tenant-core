@@ -28,7 +28,7 @@ class MultiTenantGrailsPlugin
 {
     def version = "0.18-SNAPSHOT"
     def grailsVersion = "1.2.0 > *"
-    def dependsOn = [falconeUtil: 0.8]
+    def dependsOn = [falconeUtil: "0.9.1-SNAPSHOT"]
     def author = "Eric Martineau, Scott Ryan"
     def authorEmail = "ericm@infusionsoft.com, scott@theryansplace.com"
     def title = "Multi-Tenant Plugin"
