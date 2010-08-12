@@ -47,6 +47,7 @@ public class TenantTransactionAwareDataSourceProxy extends TransactionAwareDataS
             try
             {
                 // TODO Support other than JNDI Data Sources
+                // TODO Either cache the context lookup or cache the data source for performance
                 Context ctx=new InitialContext();
                 ds=(DataSource) ctx.lookup(jndiNameForTenant);
             }
