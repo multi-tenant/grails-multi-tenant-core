@@ -26,9 +26,9 @@ import org.codehaus.groovy.grails.plugins.DefaultGrailsPluginManager
 
 class MultiTenantGrailsPlugin
 {
-    def version = "0.18-SNAPSHOT"
+    def version = "1.0.0"
     def grailsVersion = "1.2.0 > *"
-    def dependsOn = [falconeUtil: "0.9.1-SNAPSHOT"]
+    def dependsOn = [falconeUtil:"1.0"]
     def author = "Eric Martineau, Scott Ryan"
     def authorEmail = "ericm@infusionsoft.com, scott@theryansplace.com"
     def title = "Multi-Tenant Plugin"

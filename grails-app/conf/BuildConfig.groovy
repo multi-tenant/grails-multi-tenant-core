@@ -19,7 +19,7 @@ grails.project.dependency.resolution =
             // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
             // This allows the plugin to compile.  If the user wants to use the OSCache multi tenant capability they will
             // need to add the jars to their runtime configuration for the application.
-            provided("opensymphony:oscache:2.4") {
+            compile("opensymphony:oscache:2.4") {
                 excludes 'jms', 'commons-logging', 'servlet-api'
             }
 
