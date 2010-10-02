@@ -1,9 +1,9 @@
-import com.infusion.tenant.CurrentTenant
-import com.infusion.tenant.TenantResolver
-import com.infusion.tenant.event.TenantChangedEvent
+import grails.plugin.multitenant.core.CurrentTenant
+import grails.plugin.multitenant.core.TenantResolver
+import grails.plugin.multitenant.core.event.TenantChangedEvent
 import com.infusion.util.event.groovy.GroovyEventBroker
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
-import com.infusion.tenant.TenantStatusChecker
+import grails.plugin.multitenant.core.TenantStatusChecker
 import util.ConfigHelper
 
 
