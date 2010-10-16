@@ -33,7 +33,7 @@ class MultiTenantCoreGrailsPlugin {
   def dependsOn = [falconeUtil: "1.0"]
   def author = "Eric Martineau, Scott Ryan"
   def authorEmail = "ericm@infusionsoft.com, scryan@codehaus.org"
-  def title = "Multi-Tenant Plugin"
+  def title = "Multi-Tenant Plugin(Core)"
   def description = ''' Allows for managing data for mutiple 'tenants' in a single database by using a tenantId column
                           for each domain object.  Also handles the proxying of spring beans for a multi-tenant environment. '''
   // URL to the plugin's documentation
