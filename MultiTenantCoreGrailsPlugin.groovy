@@ -27,17 +27,17 @@ import grails.plugin.multitenant.core.DomainNameDatabaseTenantResolver
 import grails.plugin.multitenant.core.DomainNamePropertyTenantResolver
 import grails.plugin.multitenant.core.CurrentTenantThreadLocal
 
-class GrailsMultiTenantCoreGrailsPlugin {
-  def version = "1.0.0"
+class MultiTenantCoreGrailsPlugin {
+  def version = "1.0.0-SNAPSHOT"
   def grailsVersion = "1.3.0 > *"
   def dependsOn = [falconeUtil: "1.0"]
   def author = "Eric Martineau, Scott Ryan"
-  def authorEmail = "ericm@infusionsoft.com, scott@theryansplace.com"
+  def authorEmail = "ericm@infusionsoft.com, scryan@codehaus.org"
   def title = "Multi-Tenant Plugin"
   def description = ''' Allows for managing data for mutiple 'tenants' in a single database by using a tenantId column
                           for each domain object.  Also handles the proxying of spring beans for a multi-tenant environment. '''
   // URL to the plugin's documentation
-  def documentation = "http://grails.org/MultiTenant+Plugin"
+  def documentation = "http://grails.org/multi-tenant-core"
   def doWithSpring = {
     //Utility class that contains tenant resolver
     tenantUtils(TenantUtils) {
