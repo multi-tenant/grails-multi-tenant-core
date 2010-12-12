@@ -198,7 +198,7 @@ class MultiTenantCoreGrailsPlugin {
       application.domainClasses.each {DefaultGrailsDomainClass domainClass ->
         domainClass.constraints?.get("tenantId")?.applyConstraint(ConstrainedProperty.NULLABLE_CONSTRAINT, true);
         domainClass.clazz.metaClass.beforeInsert = {
-          if (tenantId == null) tenantId = 0
+          if (delegate.respondsTo("tenantId") && tenantId == null) { tenantId = 0 }
         }
       }
     }
