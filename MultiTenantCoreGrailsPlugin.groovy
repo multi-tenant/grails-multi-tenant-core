@@ -27,8 +27,9 @@ import grails.plugin.multitenant.core.DomainNameDatabaseTenantResolver
 import grails.plugin.multitenant.core.DomainNamePropertyTenantResolver
 import grails.plugin.multitenant.core.CurrentTenantThreadLocal
 
-class MultiTenantCoreGrailsPlugin {
-  def version = "1.0.0"
+class MultiTenantCoreGrailsPlugin
+{
+  def version = "1.0.1"
   def grailsVersion = "1.3.0 > *"
   def dependsOn = [falconeUtil: "1.0"]
   def author = "Eric Martineau, Scott Ryan"
@@ -39,29 +40,34 @@ class MultiTenantCoreGrailsPlugin {
   // URL to the plugin's documentation
   def documentation = "http://grails.org/multi-tenant-core"
   def doWithSpring = {
+    def requestResolverType = ConfigHelper.get("config") {it.tenant.resolver.request.dns.type}
     //Utility class that contains tenant resolver
     tenantUtils(TenantUtils) {
       currentTenant = ref("currentTenant")
     }
-    if (ConfigurationHolder.config.tenant.mode == "singleTenant") {
+    if (ConfigurationHolder.config.tenant.mode == "singleTenant")
+    {
 
       //Put switching datasource here
       tenantDataSourcePostProcessor(TenantDataSourcePostProcessor)
       if (
         ConfigurationHolder.config.tenant.datasourceResolver.type == "config" ||
                 ConfigurationHolder.config.tenant.datasourceResolver.type.size() == 0
-      ) {
+      )
+      {
 
         dataSourceUrlResolver(PropertyDataSourceUrlResolver)
 
-      } else {
+      } else
+      {
 
         dataSourceUrlResolver(DatabaseDatasourceUrlResolver) {
           eventBroker = ref("eventBroker")
         }
       }
 
-    } else {
+    } else
+    {
 
       //This registers hibernate events that force filtering on domain classes
       //In single tenant mode, the records are automatically filtered by different
@@ -80,17 +86,20 @@ class MultiTenantCoreGrailsPlugin {
     tenantBeanFactoryPostProcessor(TenantBeanFactoryPostProcessor)
 
     def resolverType = ConfigHelper.get("request") {it.tenant.resolver.type}
-    if (resolverType == "request") {
+    if (resolverType == "request")
+    {
       //This implementation
       currentTenant(CurrentTenantThreadLocal) {
         eventBroker = ref("eventBroker")
       }
 
-      def requestResolverType = ConfigHelper.get("config") {it.tenant.resolver.request.dns.type}
-      if (requestResolverType == "config") {
+
+      if (requestResolverType == "config")
+      {
         //Default tenant resolver is a property file.  This can be easily overridden
         tenantResolver(DomainNamePropertyTenantResolver)
-      } else if (ConfigurationHolder.config.tenant.resolver.request.dns.type == "db") {
+      } else if (ConfigurationHolder.config.tenant.resolver.request.dns.type == "db")
+      {
         tenantResolver(DomainNameDatabaseTenantResolver) {
           eventBroker = ref("eventBroker")
         }
@@ -99,19 +108,20 @@ class MultiTenantCoreGrailsPlugin {
 
     //This bean adds the current tenantId to all logs
     multiTenantLogLayout(MultiTenantLogLayout) {
-      currentTenant = ref("currentTenant")
     }
   }
 
   def doWithEvents = {
     ctx ->
-    if (ConfigurationHolder.config.tenant.mode != "singleTenant") {
+    if (ConfigurationHolder.config.tenant.mode != "singleTenant")
+    {
 
       //Listen for criteria created events
       hibernate.criteriaCreated("tenantFilter") {
         CriteriaContext context ->
         boolean hasAnnotation = TenantUtils.isAnnotated(context.entityClass)
-        if (context.entityClass == null || hasAnnotation) {
+        if (context.entityClass == null || hasAnnotation)
+        {
           final Integer tenant = ctx.currentTenant.get();
           context.criteria.add(Expression.eq("tenantId", tenant));
         }
@@ -120,8 +130,10 @@ class MultiTenantCoreGrailsPlugin {
       //Listen for query created events
       hibernate.queryCreated("tenantFilter") {
         Query query ->
-        for (String param: query.getNamedParameters()) {
-          if ("tenantId".equals(param)) {
+        for (String param: query.getNamedParameters())
+        {
+          if ("tenantId".equals(param))
+          {
             query.setParameter("tenantId", ctx.currentTenant.get(), new IntegerType());
           }
         }
@@ -131,11 +143,14 @@ class MultiTenantCoreGrailsPlugin {
 
   def doWithApplicationContext = {GrailsApplicationContext applicationContext ->
     def logValue = ConfigHelper.get(true) {it.tenant.log}
-    if (logValue) {
+    if (logValue)
+    {
       log.info "Setting up multi-tenant logging format"
       Enumeration<Appender> appenders = Logger.getRootLogger().getAllAppenders()
-      if (appenders != null) {
-        while (appenders.hasMoreElements()) {
+      if (appenders != null)
+      {
+        while (appenders.hasMoreElements())
+        {
           appenders.nextElement().setLayout(applicationContext.multiTenantLogLayout)
         }
       }
@@ -144,7 +159,8 @@ class MultiTenantCoreGrailsPlugin {
 
   def doWithWebDescriptor = {xml ->
     def resolverFromConfig = ConfigHelper.get("request") {it.tenant.resolver.type}
-    if (resolverFromConfig == "request") {
+    if (resolverFromConfig == "request")
+    {
 
       //Add filter definition to web.xml
       def filterElements = xml.'filter'[0]
@@ -162,7 +178,8 @@ class MultiTenantCoreGrailsPlugin {
       DefaultGrailsPluginManager grailsManager = (DefaultGrailsPluginManager) manager;
       grailsManager.getAllPlugins().each {
         GrailsPlugin plugin ->
-        if (plugin.getInstance().getProperties().containsKey("multiTenantFilterUrls")) {
+        if (plugin.getInstance().getProperties().containsKey("multiTenantFilterUrls"))
+        {
           List urls = plugin.getInstance().multiTenantFilterUrls
           urls.each {url ->
             log.info "Adding ${url} to multitenant request filter mappings from ${plugin}"
@@ -193,12 +210,14 @@ class MultiTenantCoreGrailsPlugin {
 
   def doWithDynamicMethods = {ctx ->
 
-    if (ConfigurationHolder.config.tenant.mode != "singleTenant") {
+    if (ConfigurationHolder.config.tenant.mode != "singleTenant")
+    {
       //Add a nullable contraint for tenantId.
       application.domainClasses.each {DefaultGrailsDomainClass domainClass ->
         domainClass.constraints?.get("tenantId")?.applyConstraint(ConstrainedProperty.NULLABLE_CONSTRAINT, true);
         domainClass.clazz.metaClass.beforeInsert = {
-          if (delegate.respondsTo("tenantId") && tenantId == null) { tenantId = 0 }
+          if (delegate.respondsTo("tenantId") && tenantId == null)
+          { tenantId = 0 }
         }
       }
     }

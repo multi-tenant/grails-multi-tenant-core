@@ -1,56 +1,48 @@
 package grails.plugin.multitenant.core.util.log.log;
 
-import grails.plugin.multitenant.core.CurrentTenant;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.helpers.PatternParser;
 
 /**
- * Created by IntelliJ IDEA.
- * User: eric
- * Date: Mar 30, 2009
- * Time: 3:40:58 PM
+ * This class will set up a pattern to support inserting the tenant id or name into the beginning of any logging
+ * pattern. It will either enhance an existing pattern or create a new pattern with the tenant id or tenant name
+ * at the beginning of the patter.
  */
-public class MultiTenantLogLayout extends PatternLayout {
-// ========================================================================================================================
-//    Static Fields
-// ========================================================================================================================
-
+public class MultiTenantLogLayout extends PatternLayout
+{
     /**
-     * Inserts a %T after the $t (thread logging) to display the current tenant.
+     * Inserts a %T after the $t (thread logging) to display the current tenant mapped id.
      */
     public static final String DEFAULT_TENANT_CONVERSION_PATTERN = "%d [%t] [tenant %T] %-5p %c{2} %x - %m%n";
 
-// ========================================================================================================================
-//    Instance Fields
-// ========================================================================================================================
-
     /**
-     * This class knows how to get the current tenant
+     * This is a constructor that does not take a pattern and there fore uses the defined default pattern.
      */
-    private CurrentTenant currentTenant;
-
-// ========================================================================================================================
-//    Constructors
-// ========================================================================================================================
-
-    public MultiTenantLogLayout() {
+    public MultiTenantLogLayout()
+    {
         this(DEFAULT_TENANT_CONVERSION_PATTERN);
     }
 
-    public MultiTenantLogLayout(String pattern) {
-        super(pattern);
+    /**
+     * This constructor allows for creation using a user defined pattern
+     *
+     * @param inPattern - The user defined logging pattern that can contain a %T where the tenant id will be inserted.
+     */
+    public MultiTenantLogLayout(String inPattern)
+    {
+        super(inPattern);
     }
 
-// ========================================================================================================================
-//    Public Instance Methods
-// ========================================================================================================================
-
-    public PatternParser createPatternParser(String pattern) {
+    /**
+     * This will create a pattern parser using the defined user pattern or the default pattern if one is not supplied.
+     * This parser knows how to insert the current tenant id in to the proper location in the pattern.
+     *
+     * @param inPattern - The logging pattern to use during the parsing operation.
+     * @return
+     */
+    public PatternParser createPatternParser(String inPattern)
+    {
         return new MultiTenantPatternParser(
-                pattern == null ? DEFAULT_TENANT_CONVERSION_PATTERN : pattern, currentTenant);
-    }
-
-    public void setCurrentTenant(CurrentTenant currentTenant) {
-        this.currentTenant = currentTenant;
+                inPattern == null ? DEFAULT_TENANT_CONVERSION_PATTERN : inPattern);
     }
 }

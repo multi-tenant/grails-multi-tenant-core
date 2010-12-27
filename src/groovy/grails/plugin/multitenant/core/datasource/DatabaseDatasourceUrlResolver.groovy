@@ -12,10 +12,11 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
  * the mode where tenant specific datasources are stored in a database either in the config database as configured
  * in the config properties or the database defined by the default datasource in the datasources config file.
  */
-public class DatabaseDatasourceUrlResolver implements DataSourceUrlResolver, ApplicationContextAware {
+public class DatabaseDatasourceUrlResolver implements DataSourceUrlResolver, ApplicationContextAware
+{
 
-  /** This is a logger for logging status and errors.                  */
-  private static Logger log = Logger.getLogger(getClass());
+  /** This is a logger for logging status and errors.                   */
+  private static Logger log = Logger.getLogger(DatabaseDatasourceUrlResolver.class);
 
   /**
    * Used for listening to save events for DomainTenantMap domain class.  If the DomainTenantMap object is saved
@@ -30,15 +31,17 @@ public class DatabaseDatasourceUrlResolver implements DataSourceUrlResolver, App
    * Caches a map of tenantId to dataSource entries
    */
   Map<Integer, String> dataSources = [:]
-  /** This tracks the load status for the data.                  */
+  /** This tracks the load status for the data.                   */
   Status status = Status.NotLoaded
   /**
    * This will return the datasource for a given tenant id.
    * @param inTenantId The tenant id you wish to retrieve the data source for.
    * @return The datasource name string for the input tenant.
    */
-  public synchronized String getDataSourceUrl(Integer inTenantId) {
-    switch (status) {
+  public synchronized String getDataSourceUrl(Integer inTenantId)
+  {
+    switch (status)
+    {
       case Status.Loading:
         return null;
         break;
@@ -49,8 +52,9 @@ public class DatabaseDatasourceUrlResolver implements DataSourceUrlResolver, App
         break;
     }
   }
-  /** This method allows you to reset the data and forces the data to be reloaded from the database on access.                  */
-  public synchronized void reset() {
+  /** This method allows you to reset the data and forces the data to be reloaded from the database on access.                   */
+  public synchronized void reset()
+  {
     this.status = Status.NotLoaded;
   }
   /**
@@ -60,10 +64,12 @@ public class DatabaseDatasourceUrlResolver implements DataSourceUrlResolver, App
    * clients database for obvious seccurity reasons however the system does support loading that data from the
    * default datasource for testing or other reasons.
    */
-  void init() {
+  void init()
+  {
     // If this is single tenant we have to use tenant 0 to avoid circular reference.
     // and it will use the default data source.
-    if (ConfigurationHolder.config.tenant.mode == "singleTenant") {
+    if (ConfigurationHolder.config.tenant.mode == "singleTenant")
+    {
       TenantUtils tenantUtils = applicationContext.getBean("tenantUtils")
       // Do this with tenant 0 so we don't end up in a cyclic loop and can support a configuration database.  The Resolver
       // will deal with what to do with tenant 0
@@ -71,7 +77,8 @@ public class DatabaseDatasourceUrlResolver implements DataSourceUrlResolver, App
         loadDataSourceTenantMap()
       }
     }
-    else {
+    else
+    {
 
     }
   }
@@ -79,7 +86,8 @@ public class DatabaseDatasourceUrlResolver implements DataSourceUrlResolver, App
    * This will load the datasource tenant map that maps the tenant id to the datasource from a database.
    *
    */
-  void loadDataSourceTenantMap() {
+  void loadDataSourceTenantMap()
+  {
     // If the data is already loaded don't reload it.
     if (status != Status.NotLoaded) return
     status = Status.Loading
@@ -99,8 +107,10 @@ public class DatabaseDatasourceUrlResolver implements DataSourceUrlResolver, App
    * list of hosts if the DataSourceTenantMap has changed.
    * @param inEventBroker - The event broker that allows us to register to listen to Hibernate events.
    */
-  public void setEventBroker(GroovyEventBroker inEventBroker) {
-    if (inEventBroker != null) {
+  public void setEventBroker(GroovyEventBroker inEventBroker)
+  {
+    if (inEventBroker != null)
+    {
       // Subscribe to the save or update event for the DataSourceTenantMap object
       inEventBroker.subscribe("hibernate.${HibernateEvent.saveOrUpdate}.DataSourceTenantMap") {
         event, broker ->

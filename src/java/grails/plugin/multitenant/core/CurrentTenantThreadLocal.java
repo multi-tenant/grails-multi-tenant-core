@@ -9,7 +9,8 @@ import java.util.List;
 /**
  * Basic implementation that stores the current tenant in a threadlocal variable.
  */
-public class CurrentTenantThreadLocal implements CurrentTenant {
+public class CurrentTenantThreadLocal implements CurrentTenant
+{
 // ========================================================================================================================
 //    Static Fields
 // ========================================================================================================================
@@ -23,23 +24,29 @@ public class CurrentTenantThreadLocal implements CurrentTenant {
 //    Public Instance Methods
 // ========================================================================================================================
 
-    public Integer get() {
+    public Integer get()
+    {
         Integer rtn = currentTenant.get();
-        if (rtn == null) {
+        if (rtn == null)
+        {
             currentTenant.set(0);
             rtn = 0;
         }
         return rtn;
     }
 
-    public void set(Integer newTenantId) {
+    public void set(Integer newTenantId)
+    {
         Integer oldTenantId = get();
-        if (!oldTenantId.equals(newTenantId)) {
+        if (!oldTenantId.equals(newTenantId))
+        {
             currentTenant.set(newTenantId);
             final TenantChangedEvent changedEvent = new TenantChangedEvent(oldTenantId, newTenantId);
-            if (eventBroker != null) {
+            if (eventBroker != null)
+            {
                 eventBroker.publish("tenantChanged", changedEvent);
-                if (!loaded.contains(newTenantId)) {
+                if (!loaded.contains(newTenantId))
+                {
                     loaded.add(newTenantId);
                     eventBroker.publish("newTenant", changedEvent);
                 }
@@ -47,11 +54,13 @@ public class CurrentTenantThreadLocal implements CurrentTenant {
         }
     }
 
-    public void resetLoadedCache() {
+    public void resetLoadedCache()
+    {
         this.loaded.clear();
     }
 
-    public void setEventBroker(EventBroker eventBroker) {
+    public void setEventBroker(EventBroker eventBroker)
+    {
         this.eventBroker = eventBroker;
     }
 }
