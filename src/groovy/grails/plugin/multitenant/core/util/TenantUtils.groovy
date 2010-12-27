@@ -86,7 +86,7 @@ public class TenantUtils
    * @return - The name of the tenant or the mapped tenant id if the name is not provided in the Domain
    *         Tenant Map domain object.
    */
-  public static String getTenantName(Integer inTenantId)
+  public static String getTenantName(def inTenantId)
   {
     String tenantName = getCachedTenantData()?.get(inTenantId)?.name
     if (tenantName == null)
@@ -108,7 +108,7 @@ public class TenantUtils
   /**
    * This will return a map of data representing the tenant for the mapped tenant id passed in.
    */
-  public static getTenantData(Integer inTenantId)
+  public static getTenantData(def inTenantId)
   {
     return getCachedTenantData()?.get(inTenantId)
   }
