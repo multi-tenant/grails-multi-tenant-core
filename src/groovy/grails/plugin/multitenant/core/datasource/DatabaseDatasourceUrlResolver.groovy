@@ -8,14 +8,14 @@ import org.springframework.context.ApplicationContextAware
 import grails.plugin.multitenant.core.util.TenantUtils
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 /**
- *  This class supports the loading of datasource information in support of the single tenant mode.  It supports
- * the mode where tenant specific datasources are stored in a database either in the config database as configured
- * in the config properties or the database defined by the default datasource in the datasources config file.
+ *  This class supports the loading of data source information in support of the single tenant mode.  It supports
+ * the mode where tenant specific data sources are stored in a database either in the config database as configured
+ * in the config properties or the database defined by the default data source in the data sources config file.
  */
 public class DatabaseDatasourceUrlResolver implements DataSourceUrlResolver, ApplicationContextAware
 {
 
-  /** This is a logger for logging status and errors.                   */
+  /** This is a logger for logging status and errors.                      */
   private static Logger log = Logger.getLogger(DatabaseDatasourceUrlResolver.class);
 
   /**
@@ -31,12 +31,12 @@ public class DatabaseDatasourceUrlResolver implements DataSourceUrlResolver, App
    * Caches a map of tenantId to dataSource entries
    */
   Map<Integer, String> dataSources = [:]
-  /** This tracks the load status for the data.                   */
+  /** This tracks the load status for the data.                      */
   Status status = Status.NotLoaded
   /**
-   * This will return the datasource for a given tenant id.
+   * This will return the data source for a given tenant id.
    * @param inTenantId The tenant id you wish to retrieve the data source for.
-   * @return The datasource name string for the input tenant.
+   * @return The data source name string for the input tenant.
    */
   public synchronized String getDataSourceUrl(Integer inTenantId)
   {
@@ -52,20 +52,21 @@ public class DatabaseDatasourceUrlResolver implements DataSourceUrlResolver, App
         break;
     }
   }
-  /** This method allows you to reset the data and forces the data to be reloaded from the database on access.                   */
+  /** This method allows you to reset the data and forces the data to be reloaded from the database on access.                      */
   public synchronized void reset()
   {
     this.status = Status.NotLoaded;
   }
   /**
-   * This will initialize this object by loading the initial dataset from the database.   The tenant is set to 0 so that
+   * This will initialize this object by loading the initial data set from the database.   The tenant is set to 0 so that
    * we can force it to use a fixed tenant to load this data otherwise you end up in a circular reference.  The data
-   * for the datasources should be stored in a configuration database as defined in the config database and not in each
-   * clients database for obvious seccurity reasons however the system does support loading that data from the
-   * default datasource for testing or other reasons.
+   * for the data sources should be stored in a configuration database as defined in the config database and not in each
+   * clients database for obvious security reasons however the system does support loading that data from the
+   * default data source for testing or other reasons.
    */
   void init()
   {
+    log.info "Initializing Data Source Map for Multi Tenant support"
     // If this is single tenant we have to use tenant 0 to avoid circular reference.
     // and it will use the default data source.
     if (ConfigurationHolder.config.tenant.mode == "singleTenant")
@@ -77,25 +78,27 @@ public class DatabaseDatasourceUrlResolver implements DataSourceUrlResolver, App
         loadDataSourceTenantMap()
       }
     }
-    else
-    {
-
-    }
   }
   /**
-   * This will load the datasource tenant map that maps the tenant id to the datasource from a database.
+   * This will load the data source tenant map that maps the tenant id to the data source from a database.
    *
    */
   void loadDataSourceTenantMap()
   {
+    // See if there is a custom data source bean name
+    def dataSourceBeanName = ConfigurationHolder.config.tenant.dataSourceBeanName
+    if (dataSourceBeanName == null || dataSourceBeanName?.size() == 0)
+    {
+      dataSourceBeanName = "tenant.DataSourceTenantMap"
+    }
     // If the data is already loaded don't reload it.
     if (status != Status.NotLoaded) return
     status = Status.Loading
-    log.info "Loading Tenant to dataSource information from the database object DataSourceTenantMap"
-    // Clear out the map of tenant to datasource
+    // Clear out the map of tenant to data source
     dataSources.clear();
     //This will load all domain tenants, regardless of which tenant they're for
-    def list = applicationContext.getBean("tenant.DataSourceTenantMap").findAll("from tenant.DataSourceTenantMap");
+    def list = applicationContext.getBean(dataSourceBeanName).list();
+    log.info "Loading " + list?.size() + " Mapped Tenant Id to DataSource entries from the database object " + dataSourceBeanName
     list.each {map ->
       if (log.isDebugEnabled()) log.debug "Tenant->DataSource: ${map.mappedTenantId}->${map.dataSource}"
       dataSources.put(map.mappedTenantId, map.dataSource)

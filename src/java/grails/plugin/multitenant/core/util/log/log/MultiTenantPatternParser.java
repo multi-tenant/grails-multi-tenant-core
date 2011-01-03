@@ -45,9 +45,14 @@ public class MultiTenantPatternParser extends PatternParser
 
         public String convert(LoggingEvent event)
         {
-            final String rtn;
-            rtn = TenantUtils.getCurrentTenantName().toString();
-            return rtn;
+            Integer rtn = TenantUtils.getCurrentTenant();
+            if (rtn == null)
+            {
+                return "N/A";
+            } else
+            {
+                return rtn.toString();
+            }
         }
     }
 }

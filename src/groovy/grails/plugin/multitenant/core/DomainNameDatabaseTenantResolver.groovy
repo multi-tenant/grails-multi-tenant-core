@@ -1,4 +1,4 @@
-package grails.plugin.multitenant.core;
+package grails.plugin.multitenant.core
 
 import com.infusion.util.event.groovy.GroovyEventBroker
 import com.infusion.util.domain.event.HibernateEvent
@@ -8,6 +8,7 @@ import org.apache.log4j.Logger
 import net.sf.ehcache.CacheManager
 import net.sf.ehcache.Cache
 import net.sf.ehcache.Element
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 /**
  * Implementation that looks up tenantIds from a local table DomainTenantMap that stores domain name to tenantId mappings
@@ -16,8 +17,8 @@ import net.sf.ehcache.Element
  */
 public class DomainNameDatabaseTenantResolver extends BaseDomainNameTenantResolver implements ApplicationContextAware
 {
-  /** This is a logger for logging status and error messages.                           */
-  private static Logger log = Logger.getLogger(DomainNameDatabaseTenantResolver.class);
+  /** This is a logger for logging status and error messages.                             */
+  private static Logger log = Logger.getLogger(DomainNameDatabaseTenantResolver.class)
 
   /**
    * Used for listening to save events for DomainTenantMap domain class
@@ -46,21 +47,26 @@ public class DomainNameDatabaseTenantResolver extends BaseDomainNameTenantResolv
   void loadDomainTenantMap()
   {
     hosts.clear()
-    Cache tenantDataCache = CacheManager.getInstance()?.getCache(TENANT_DATA_CACHE_NAME);
+    Cache tenantDataCache = CacheManager.getInstance()?.getCache(TENANT_DATA_CACHE_NAME)
     if (tenantDataCache == null)
     {
       // This insures the cache has no limit and items are never removed from the cache.
       CacheManager.getInstance().addCache(new Cache(TENANT_DATA_CACHE_NAME, 1000, true, true, 120, 120))
-      tenantDataCache = CacheManager.getInstance()?.getCache(TENANT_DATA_CACHE_NAME);
+      tenantDataCache = CacheManager.getInstance()?.getCache(TENANT_DATA_CACHE_NAME)
     }
     else
     {
-      tenantDataCache.removeAll();
+      tenantDataCache.removeAll()
     }
-    log.info "Loading Domain Name to Tenant information from the database object DomainTenantMap"
+    // See if there is a custom data source bean name
+    def domainTenantBeanName = ConfigurationHolder.config.tenant.domainTenantBeanName
+    if (domainTenantBeanName == null || domainTenantBeanName?.size() == 0)
+    {
+      domainTenantBeanName = "tenant.DomainTenantMap"
+    }
     // Load the tenant information for the domain to tenant id from the database.
-    // TODO Allow for any class name for the object.
-    def list = applicationContext.getBean("tenant.DomainTenantMap").findAll("from tenant.DomainTenantMap");
+    def list = applicationContext.getBean(domainTenantBeanName).list()
+    log.info "Loading " + list?.size() + " Domain Name to Mapped Tenant Id entries from the database object " + domainTenantBeanName
     list.each {map ->
       if (log.isDebugEnabled())
       {
@@ -81,7 +87,7 @@ public class DomainNameDatabaseTenantResolver extends BaseDomainNameTenantResolv
       inEventBroker.subscribe("hibernate.${HibernateEvent.saveOrUpdate}.DomainTenantMap") {
         event, broker ->
         log.info "DomainTenantMap was changed via a save or update.  Reloading the Domain to Tenant information from the database."
-        this.initialize();
+        this.initialize()
       }
     }
   }
