@@ -48,6 +48,7 @@ public abstract class BaseDomainNameTenantResolver implements TenantResolver
         if (tenantId == null)
         {
             log.fatal("Could not decode valid tenant id from request server " + inRequest.getServerName());
+            throw new InvalidTenantException("Could not decode mapped tenant id from request server name " + inRequest.getServerName());
         }
         if (log.isDebugEnabled())
         {

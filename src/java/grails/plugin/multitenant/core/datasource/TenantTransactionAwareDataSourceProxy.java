@@ -1,6 +1,7 @@
 package grails.plugin.multitenant.core.datasource;
 
 import grails.plugin.multitenant.core.CurrentTenant;
+import grails.plugin.multitenant.core.InvalidTenantException;
 import org.apache.log4j.Logger;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 
@@ -47,7 +48,10 @@ public class TenantTransactionAwareDataSourceProxy extends TransactionAwareDataS
 
     /**
      * This method will return the actual data source for the active tenant.  If no tenant can be resolve then the
-     * default data source is returned and assumed to connect to the configuration database as tenant 0.
+     * default data source is returned and assumed to connect to the configuration database as tenant 0.   If the
+     * tenant is null we throw an exception.  If the tenant is 0 we return the original default which should be the
+     * default data source.  If the tenant is non zero we look up the jndi entry and return it if it is not null.  If it
+     * is null we throw an InvalidTenantException.
      *
      * @return The data source for the current thread local tenant.
      */
@@ -55,13 +59,21 @@ public class TenantTransactionAwareDataSourceProxy extends TransactionAwareDataS
     public DataSource getTargetDataSource()
     {
         DataSource ds = super.getTargetDataSource();
-        if (currentTenant.get() != 0)
+        Integer tenant = currentTenant.get();
+        if (tenant == null)
+        {
+            throw new InvalidTenantException("No tenant (null) returned to locate the JNDI Name for.");
+        } else if (tenant != 0)
         {
             // If not tenant 0 then look up the jndi name from the tenant.
-            final String jndiNameForTenant = dataSourceUrlResolver.getDataSourceUrl(currentTenant.get());
+            final String jndiNameForTenant = dataSourceUrlResolver.getDataSourceUrl(tenant);
+            if (jndiNameForTenant == null)
+            {
+                throw new InvalidTenantException("No JNDI Name returned for tenant " + tenant);
+            }
             if (log.isDebugEnabled())
             {
-                log.debug("Returning the jndi dataSource " + jndiNameForTenant + " for tenant " + currentTenant.get());
+                log.debug("Returning the jndi dataSource " + jndiNameForTenant + " for tenant " + tenant);
             }
             try
             {
@@ -75,6 +87,7 @@ public class TenantTransactionAwareDataSourceProxy extends TransactionAwareDataS
                 log.fatal("Exception in Multi-tenant data source provider", ex);
             }
         }
+        log.info("Returning data source for tenant 0 as" + ds);
         return ds;
     }
 
