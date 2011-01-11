@@ -87,7 +87,10 @@ public class TenantTransactionAwareDataSourceProxy extends TransactionAwareDataS
                 log.fatal("Exception in Multi-tenant data source provider", ex);
             }
         }
-        log.info("Returning data source for tenant 0 as" + ds);
+        if (log.isDebugEnabled())
+        {
+            log.debug("Returning data source for tenant 0 as" + ds);
+        }
         return ds;
     }
 
