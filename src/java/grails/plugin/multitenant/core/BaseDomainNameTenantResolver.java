@@ -44,15 +44,23 @@ public abstract class BaseDomainNameTenantResolver implements TenantResolver
             initialize();
             loaded = true;
         }
-        Integer tenantId = hosts.get(inRequest.getServerName());
+
+		String headerName = "x-forwarded-host";
+		String currentServerName = inRequest.getServerName();
+		if (inRequest.getHeader(headerName) != null) {
+			currentServerName = inRequest.getHeader(headerName);
+			log.debug("http request URL ["+currentServerName+"] decoded using header ["+headerName+"] from request");
+		}
+
+        Integer tenantId = hosts.get(currentServerName);
         if (tenantId == null)
         {
-            log.fatal("Could not decode valid tenant id from request server " + inRequest.getServerName());
-            throw new InvalidTenantException("Could not decode mapped tenant id from request server name " + inRequest.getServerName());
+            log.fatal("Could not decode valid tenant id from request server " + currentServerName);
+            throw new InvalidTenantException("Could not decode mapped tenant id from request server name " + currentServerName);
         }
         if (log.isDebugEnabled())
         {
-            log.debug("Decoded tenant id " + tenantId + " from http request URL " + inRequest.getServerName());
+            log.debug("Decoded tenant id " + tenantId + " from http request URL " + currentServerName);
         }
         return tenantId;
     }
