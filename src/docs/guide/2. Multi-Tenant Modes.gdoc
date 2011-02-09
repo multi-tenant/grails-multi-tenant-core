@@ -1,0 +1,11 @@
+The webapp always runs in multi-tenant mode, but you have the choice on how your database will operate. You can choose either one database per customer (single-tenant), or one database for all customers (multi-tenant).
+
+In Config.groovy, add the following section:
+
+{code}
+tenant {
+    mode = "singleTenant" // OR "multiTenant"
+}
+{code}
+
+{warn}multiTenant is the default{warn}

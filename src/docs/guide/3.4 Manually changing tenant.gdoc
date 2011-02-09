@@ -1,0 +1,18 @@
+Occasionally, you will need to perform data operations for a specific tenant. For example, if you have a signup form on your website and you need to create a bunch of default records for the new tenant. There is a utility class you can use to execute a block of code for a specific tenant:
+
+{code}
+import grails.plugin.multitenant.core.util.TenantUtils
+
+...
+
+//Everything in the following block will be applied to tenantId=15
+TenantUtils.doWithTenant(15) {
+  Contact c = new Contact(firstName:"Bob")
+  c.save() //This record will be saved to tenantId=15
+}
+
+//Now the tenantId will be set back to what it was before
+
+...
+
+{code}

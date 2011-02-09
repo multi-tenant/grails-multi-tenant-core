@@ -1,0 +1,8 @@
+If the domain-name based approach doesn't work for you, you can implement your own TenantResolver by implementing the TenantResolver interface and then adding that class to your spring config:
+
+{code}
+beans {
+    //Make sure to import!
+    tenantResolver(MyCustomTenantResolver)
+}
+{code}

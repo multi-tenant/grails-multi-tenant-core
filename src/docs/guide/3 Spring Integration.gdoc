@@ -1,0 +1,21 @@
+Some of your beans may contain state that needs to be unique per tenant. A good example of this might be a bean that contains a cache, where they key in the cache would result in collisions if it were shared among all tenants.
+
+With this plugin, you can write the beans as if they are for only one tenant, and the plugin will manage a copy of the bean for each tenant for you and make sure the correct instance is used in the appropriate places. Mark each stateful spring bean as "uniquePerTenant" as follows:
+
+{code}
+class SomeStatefulBean implements SomeStatefulBeanInterface {
+
+    public static boolean uniquePerTenant = true
+
+}
+{code}
+
+Because of the way Spring AOP works, you have to create an interface for your spring bean and make sure you are wiring the interface, not the implementation itself. 
+
+Sometimes, you may not have access to the source code to add "public static boolean uniquePerTenant = true" to the spring bean. You can still make the bean unique by adding the name of the bean to the "tenant.uniquePerTenantBeans" property in Config.groovy:
+
+{code}
+tenant {
+    uniquePerTenantBeans = ["beanName1", "beanName2"]
+}
+{code}

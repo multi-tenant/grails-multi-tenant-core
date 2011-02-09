@@ -1,0 +1,19 @@
+h2. Annotate Domain Classes
+
+As of 0.10, you only have to annotate domain classes that you want to be multi-tenant. Any domain classes that you want to be shared, such as acegi Role/Requestmap can be left without the annotation.
+
+{code}
+import grails.plugin.multitenant.core.groovy.compiler.MultiTenant;
+
+@MultiTenant class MyDomainClass {
+
+}
+{code}
+
+Because the plugin hooks into the compiler, make sure to do a "grails clean" after you've annotated your classes. Eventually, we'd like to get rid of this step. 
+
+h2. A note on indexing in multi-tenant environment
+
+Indexing a multi-tenant database is a tricky beast. If you have large datasets (100MM-1BB), prepare yourself for some fun. Google multi-tenant databases and start reading. :)
+
+The short of it is that it's probably most efficient to create multi-column indexes that always include tenantId, that way the db can limit the working set to a single tenant before it starts filtering on another field.

@@ -1,0 +1,16 @@
+* 1.0.3 (January 11, 2011)
+** Add InvalidTenantException when Tenant resolver cannot resolve tenant and do not enter the data source resolver
+** Reset the tenant Id to 0 after leaving the filter even if an exception is thrown to avoid picking up other threads tenants
+
+* 1.0.2 (January 3, 2011)
+** Fix bug with recursive logging decorator GRAILSPLUGINS-2723
+** Added the ability to configure the full name of the Database Objects to support Domain to Tenant and Data Source to Tenant Mapping
+
+* 1.0.1 (December 26, 2010)
+** Fix bug processing non-annotated domain objects GRAILSPLUGINS-2579
+** Update the TenantUtils to handle adding a name parameter to the domain name object
+** Update logging to include the tenant Id or the Tenant name if present
+** Add methods to TenantUtils to allow retrieval of tenant name if present and to retrieve the DomainTenantMap object
+** Add Name parameter to the DomainTenaantMap generator
+
+* 1.0.0 - Initial migration from the original multi-tenant plugin to allow better refactoring and to add more components.

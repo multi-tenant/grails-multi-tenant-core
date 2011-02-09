@@ -1,0 +1,69 @@
+The plugin reads a property named "tenant.resolver.type" to know how to resolve the current tenant. The DNS resolver is the default resolver for the plugin, but this is how you would specify it in Config.groovy:
+
+{code}
+tenant { 
+    resolver.type = "request" 
+}
+{code}
+
+h2. Mapping subdomains using Config.groovy
+
+The easiest (and default) behavior is to simply map subdomains (or domains) to tenantIds in Config.groovy. Whenever a request comes in for a matching DNS entry, that tenantId will be set. Managing DNS is a pain, but you can easily add a wildcard DNS entry, then allocate subdomains on the fly without any propagation or updating to/from the DNS server:
+
+{code}
+tenant {
+    resolver.request.dns.type = "config"  //This is the default
+    domainTenantMap {
+        client1.myco.com = 1
+        client2.com = 2
+        client3.myco.com = 3
+    }
+}
+{code}
+
+h2. Mapping subdomains using the database
+
+Mapping subdomains in Config.groovy works great if your tenant mapping is static. However, if you want customers to be able to sign up automatically online, you can use a database-based tenant resolver by adding the following to your Config.groovy:
+
+{code}
+tenant { 
+    resolver.request.dns.type = "db" 
+}
+{code}
+
+The plugin provides a command to install a domain class that will be used to store the dns/tenant mappings. Adding rows to the DomainTenantMap table will add those mappings on-the-fly (no restart required)
+
+{code}
+grails create-dns-map
+{code}
+
+h2. Security and TenantId
+
+{warn}
+One advantage of identifying tenants by domain name is that any session cookies will be unique per domain, helping with security. This means that if a user authenticates (and gets an authentication cookie), if he changes the domain he's using to access the application, he won't stay logged on because the cookie for the old domain won't apply.
+
+This does have a loophole, though. Because the cookie lives on the client browser, it may be possible for the user to inspect the cookie, and copy any values such as jsessionid to a cookie for a different domain, thus gaining access to another tenant's data. It really depends on how secure your cookie is (does an authentication token only work for one domain?)
+
+The multi-tenant plugin uses a very simple messaging system from the falcone-util plugin. Whenever the tenantId changes, a message is published with the new and old tenantIds. You can use this event to perform any necessary checks, and clean up any resources you don't want around when the tenantId changes. Example as follows:
+{warn}
+
+{code}
+//A sample class that might contain an authenticated user
+class AuthenticatedUser {
+
+    //Wire in the eventBroker bean - this is where events are published from and subscribed to 
+    GroovyEventBroker eventBroker
+
+    public AuthenticatedUser() { 
+
+        //Somewhere in your code, subscribe to the tenantChanged event 
+        //Call subscribe method on eventBroker, provide a closure as an event handler 
+
+        eventBroker.subscribe("tenantChanged") { event, broker -> 
+            if(this.tenantId != event.newTenantId) { 
+                this.logout() 
+            }
+        }
+    }
+}
+{code}

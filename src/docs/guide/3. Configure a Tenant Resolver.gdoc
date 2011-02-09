@@ -1,0 +1,1 @@
+A tenant resolver is the mechanism that figures out who the current tenant is. The plugin ships with two ways of doing this, and you can also implement your own.
