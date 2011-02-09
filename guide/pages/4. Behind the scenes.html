@@ -1,0 +1,37 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>4. Behind the scenes</title>
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
+    </head>
+    <body class="body">
+    Here's what the plugin does behind the scenes:<p class="paragraph"/><h2> Multi-Tenant Mode</h2>
+<ul class="star">
+<li>Performs compile time injection to add a "tenantId" column to all domain objects (multi-tenant mode)</li>
+<li>Adds a nullable constraint for the tenantId column (to avoid annoying validation failures)</li>
+<li>Intercepts and wraps all hibernate Criteria and Query that force filtering on tenantId so that:</li>
+<ul class="star">
+<li>All GORM functions backed by a Criteria object always return records ONLY for the current tenant (createCriteria, countBy, exists, find, get, list, listOrderBy, withCriteria)</li>
+<li>All GORM functions backed by a Query object will inject a named parameter "tenantId" with the current tenantId if a named parameter already exists This is one way you can get around the tenant filtering if you need to.</li>
+</ul>
+<li>Listens to appropriate hibernate events to check for tenantId:</li>
+<ul class="star">
+<li>onPreDelete - make sure the record you're deleting matches the current tenantId</li>
+<li>onLoad - make sure you the record you are loading matches the current tenantId</li>
+<li>onPreUpdate - make sure the record you are updating matches the current tenantId</li>
+<li>onPreInsert - set the current tenantId for the record being added.tenantId</li>
+</ul></ul><p class="paragraph"/><h2> Single-Tenant Mode</h2>
+<ul class="star">
+<li>Converts the "dataSource" bean into an AOP proxy that creates a new datasource for each tenant</li>
+</ul><p class="paragraph"/><h2> Other</h2>
+<ul class="star">
+<li>For each spring bean marked as uniquePerTenant:</li>
+<ul class="star">
+<li>Convert the spring bean definition to prototype (the spring container will need to be able to create a unique instance of the bean for each tenant)</li>
+<li>Replaces the original bean definition with a Spring AOP proxy definition. The proxy intercepts each method, locates the appropriate bean for the current tenant (or creates a new one if needed), and delegates the method call to that bean.</li>
+</ul>
+<li>Adds a request filter for all controllers that binds the value from session.tenantId to a threadLocal variable. All code processed during that thread's execution will apply only to that tenant.</li>
+<li>Adds a request filter for development mode only that sets the current session's tenantId by passing a request parameter, __tenantId.</li>
+</ul><p class="paragraph"/>
+    </body>
+</html>

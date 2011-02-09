@@ -1,0 +1,13 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>3.3 Custom Tenant Resolver</title>
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
+    </head>
+    <body class="body">
+    If the domain-name based approach doesn't work for you, you can implement your own TenantResolver by implementing the TenantResolver interface and then adding that class to your spring config:<p class="paragraph"/><div class="code"><pre>beans &#123;
+    //Make sure to <span class="java&#45;keyword">import</span>!
+    tenantResolver(MyCustomTenantResolver)
+&#125;</pre></div>
+    </body>
+</html>

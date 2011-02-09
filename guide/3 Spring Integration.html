@@ -1,0 +1,12 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>3 Spring Integration</title>
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
+    </head>
+    <body class="body">
+    <h1><a name="3 Spring Integration">3 Spring Integration</a></h1>Some of your beans may contain state that needs to be unique per tenant. A good example of this might be a bean that contains a cache, where they key in the cache would result in collisions if it were shared among all tenants.<p class="paragraph"/>With this plugin, you can write the beans as if they are for only one tenant, and the plugin will manage a copy of the bean for each tenant for you and make sure the correct instance is used in the appropriate places. Mark each stateful spring bean as "uniquePerTenant" as follows:<p class="paragraph"/><div class="code"><pre>class SomeStatefulBean <span class="java&#45;keyword">implements</span> SomeStatefulBeanInterface &#123;<p class="paragraph"/>    <span class="java&#45;keyword">public</span> <span class="java&#45;keyword">static</span> <span class="java&#45;object">boolean</span> uniquePerTenant = <span class="java&#45;keyword">true</span><p class="paragraph"/>&#125;</pre></div><p class="paragraph"/>Because of the way Spring AOP works, you have to create an interface for your spring bean and make sure you are wiring the interface, not the implementation itself.<p class="paragraph"/>Sometimes, you may not have access to the source code to add "public static boolean uniquePerTenant = true" to the spring bean. You can still make the bean unique by adding the name of the bean to the "tenant.uniquePerTenantBeans" property in Config.groovy:<p class="paragraph"/><div class="code"><pre>tenant &#123;
+    uniquePerTenantBeans = &#91;<span class="java&#45;quote">"beanName1"</span>, <span class="java&#45;quote">"beanName2"</span>&#93;
+&#125;</pre></div>
+    </body>
+</html>

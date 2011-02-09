@@ -1,0 +1,12 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>3.2 Acegi Resolver Set Up</title>
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
+    </head>
+    <body class="body">
+    To make the multi-tenant plugin work with acegi, you have to install an additional plugin<p class="paragraph"/><div class="code"><pre>grails install&#45;plugin multi&#45;tenant&#45;acegi</pre></div><p class="paragraph"/><h2> Config.groovy</h2><p class="paragraph"/>Your tenant resolver property should look like this:<p class="paragraph"/><div class="code"><pre>tenant &#123;
+    resolver.type = <span class="java&#45;quote">"acegi"</span>
+&#125;</pre></div><p class="paragraph"/><h2>User domain class</h2><p class="paragraph"/>Whichever User domain class you are using with the acegi plugin should have a property on it called "userTenantId". You will have to manually set this value for each user correctly. Note that you should not annotate your User domain class with <code>MultiTenant.<p class="paragraph"/><h2>Role and Requestmap domain class</h2><p class="paragraph"/>Note that Role and Requestmap domain classes will keep annotated with </code>MultiTenant, the same as the other domain classes. 
+    </body>
+</html>

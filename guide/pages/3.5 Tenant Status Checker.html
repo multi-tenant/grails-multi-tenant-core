@@ -1,0 +1,10 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>3.5 Tenant Status Checker</title>
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
+    </head>
+    <body class="body">
+    You will probably want a way to verify that each tenant has access to their application. If you add a bean to spring named "tenantStatusChecker" that implements the "TenantStatusChecker" interface grails.plugin.multitenant.core.TenantStatusChecker, then this plugin will automatically validate each request and redirect to /noaccess.gsp if the tenant doesn't have access.<p class="paragraph"/>This is pretty clunky and we have plans to make it much better in the future&#8230;
+    </body>
+</html>

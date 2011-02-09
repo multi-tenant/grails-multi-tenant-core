@@ -1,0 +1,8 @@
+DefaultPackage
+grails.plugin.multitenant.core
+grails.plugin.multitenant.core.datasource
+grails.plugin.multitenant.core.domain
+grails.plugin.multitenant.core.groovy.compiler
+grails.plugin.multitenant.core.hibernate
+grails.plugin.multitenant.core.util
+grails.plugin.multitenant.core.util.log.log

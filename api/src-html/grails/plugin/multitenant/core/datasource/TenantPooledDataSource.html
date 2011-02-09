@@ -1,0 +1,125 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package grails.plugin.multitenant.core.datasource;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import grails.plugin.multitenant.core.CurrentTenant;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import org.apache.commons.dbcp.BasicDataSource;<a name="line.4"></a>
+<FONT color="green">005</FONT>    <a name="line.5"></a>
+<FONT color="green">006</FONT>    import java.sql.SQLException;<a name="line.6"></a>
+<FONT color="green">007</FONT>    <a name="line.7"></a>
+<FONT color="green">008</FONT>    import javax.sql.DataSource;<a name="line.8"></a>
+<FONT color="green">009</FONT>    <a name="line.9"></a>
+<FONT color="green">010</FONT>    /**<a name="line.10"></a>
+<FONT color="green">011</FONT>     * This class allows pooled data sources to be used for multiple tenant databases.<a name="line.11"></a>
+<FONT color="green">012</FONT>     */<a name="line.12"></a>
+<FONT color="green">013</FONT>    public class TenantPooledDataSource extends BasicDataSource implements TenantDataSource {<a name="line.13"></a>
+<FONT color="green">014</FONT>    // ======================================================================================================================== <a name="line.14"></a>
+<FONT color="green">015</FONT>    //    Static Fields <a name="line.15"></a>
+<FONT color="green">016</FONT>    // ======================================================================================================================== <a name="line.16"></a>
+<FONT color="green">017</FONT>    <a name="line.17"></a>
+<FONT color="green">018</FONT>        public static final boolean multiTenant = true;<a name="line.18"></a>
+<FONT color="green">019</FONT>    <a name="line.19"></a>
+<FONT color="green">020</FONT>    // ======================================================================================================================== <a name="line.20"></a>
+<FONT color="green">021</FONT>    //    Instance Fields<a name="line.21"></a>
+<FONT color="green">022</FONT>    // ======================================================================================================================== <a name="line.22"></a>
+<FONT color="green">023</FONT>    <a name="line.23"></a>
+<FONT color="green">024</FONT>        private CurrentTenant currentTenant;<a name="line.24"></a>
+<FONT color="green">025</FONT>        private DataSourceUrlResolver dataSourceUrlResolver;<a name="line.25"></a>
+<FONT color="green">026</FONT>    <a name="line.26"></a>
+<FONT color="green">027</FONT>    // ======================================================================================================================== <a name="line.27"></a>
+<FONT color="green">028</FONT>    //    Public Instance Methods<a name="line.28"></a>
+<FONT color="green">029</FONT>    // ======================================================================================================================== <a name="line.29"></a>
+<FONT color="green">030</FONT>    <a name="line.30"></a>
+<FONT color="green">031</FONT>        public boolean isWrapperFor(Class&lt;?&gt; aClass) throws SQLException {<a name="line.31"></a>
+<FONT color="green">032</FONT>            throw new UnsupportedOperationException();<a name="line.32"></a>
+<FONT color="green">033</FONT>        }<a name="line.33"></a>
+<FONT color="green">034</FONT>    <a name="line.34"></a>
+<FONT color="green">035</FONT>        public void setCurrentTenant(CurrentTenant currentTenant) {<a name="line.35"></a>
+<FONT color="green">036</FONT>            this.currentTenant = currentTenant;<a name="line.36"></a>
+<FONT color="green">037</FONT>        }<a name="line.37"></a>
+<FONT color="green">038</FONT>    <a name="line.38"></a>
+<FONT color="green">039</FONT>        public void setDataSourceUrlResolver(DataSourceUrlResolver dataSourceUrlResolver) {<a name="line.39"></a>
+<FONT color="green">040</FONT>            this.dataSourceUrlResolver = dataSourceUrlResolver;<a name="line.40"></a>
+<FONT color="green">041</FONT>        }<a name="line.41"></a>
+<FONT color="green">042</FONT>    <a name="line.42"></a>
+<FONT color="green">043</FONT>        public &lt;T&gt; T unwrap(Class&lt;T&gt; tClass) throws SQLException {<a name="line.43"></a>
+<FONT color="green">044</FONT>            throw new UnsupportedOperationException();<a name="line.44"></a>
+<FONT color="green">045</FONT>        }<a name="line.45"></a>
+<FONT color="green">046</FONT>    <a name="line.46"></a>
+<FONT color="green">047</FONT>    // ======================================================================================================================== <a name="line.47"></a>
+<FONT color="green">048</FONT>    //    Non-Public Instance Methods<a name="line.48"></a>
+<FONT color="green">049</FONT>    // ======================================================================================================================== <a name="line.49"></a>
+<FONT color="green">050</FONT>    <a name="line.50"></a>
+<FONT color="green">051</FONT>        @Override<a name="line.51"></a>
+<FONT color="green">052</FONT>        protected DataSource createDataSource() throws SQLException {<a name="line.52"></a>
+<FONT color="green">053</FONT>            final String dataSourceUrl = dataSourceUrlResolver.getDataSourceUrl(currentTenant.get());<a name="line.53"></a>
+<FONT color="green">054</FONT>            if (dataSourceUrl != null) {<a name="line.54"></a>
+<FONT color="green">055</FONT>                this.url = dataSourceUrl;<a name="line.55"></a>
+<FONT color="green">056</FONT>            }<a name="line.56"></a>
+<FONT color="green">057</FONT>            return super.createDataSource();<a name="line.57"></a>
+<FONT color="green">058</FONT>        }<a name="line.58"></a>
+<FONT color="green">059</FONT>    }<a name="line.59"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

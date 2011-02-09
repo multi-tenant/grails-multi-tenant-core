@@ -1,0 +1,41 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>3. Configure a Tenant Resolver</title>
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
+    </head>
+    <body class="body">
+    <h1><a name="3. Configure a Tenant Resolver">3. Configure a Tenant Resolver</a></h1>A tenant resolver is the mechanism that figures out who the current tenant is. The plugin ships with two ways of doing this, and you can also implement your own.<h2><a name="3.1 DNS Resolver Set Up">3.1 DNS Resolver Set Up</a></h2>The plugin reads a property named "tenant.resolver.type" to know how to resolve the current tenant. The DNS resolver is the default resolver for the plugin, but this is how you would specify it in Config.groovy:<p class="paragraph"/><div class="code"><pre>tenant &#123; 
+    resolver.type = <span class="java&#45;quote">"request"</span> 
+&#125;</pre></div><p class="paragraph"/><h2>Mapping subdomains using Config.groovy</h2><p class="paragraph"/>The easiest (and default) behavior is to simply map subdomains (or domains) to tenantIds in Config.groovy. Whenever a request comes in for a matching DNS entry, that tenantId will be set. Managing DNS is a pain, but you can easily add a wildcard DNS entry, then allocate subdomains on the fly without any propagation or updating to/from the DNS server:<p class="paragraph"/><div class="code"><pre>tenant &#123;
+    resolver.request.dns.type = <span class="java&#45;quote">"config"</span>  //This is the <span class="java&#45;keyword">default</span>
+    domainTenantMap &#123;
+        client1.myco.com = 1
+        client2.com = 2
+        client3.myco.com = 3
+    &#125;
+&#125;</pre></div><p class="paragraph"/><h2>Mapping subdomains using the database</h2><p class="paragraph"/>Mapping subdomains in Config.groovy works great if your tenant mapping is static. However, if you want customers to be able to sign up automatically online, you can use a database-based tenant resolver by adding the following to your Config.groovy:<p class="paragraph"/><div class="code"><pre>tenant &#123; 
+    resolver.request.dns.type = <span class="java&#45;quote">"db"</span> 
+&#125;</pre></div><p class="paragraph"/>The plugin provides a command to install a domain class that will be used to store the dns/tenant mappings. Adding rows to the DomainTenantMap table will add those mappings on-the-fly (no restart required)<p class="paragraph"/><div class="code"><pre>grails create&#45;dns&#45;map</pre></div><p class="paragraph"/><h2>Security and TenantId</h2><p class="paragraph"/>{warn}
+One advantage of identifying tenants by domain name is that any session cookies will be unique per domain, helping with security. This means that if a user authenticates (and gets an authentication cookie), if he changes the domain he's using to access the application, he won't stay logged on because the cookie for the old domain won't apply.<p class="paragraph"/>This does have a loophole, though. Because the cookie lives on the client browser, it may be possible for the user to inspect the cookie, and copy any values such as jsessionid to a cookie for a different domain, thus gaining access to another tenant's data. It really depends on how secure your cookie is (does an authentication token only work for one domain?)<p class="paragraph"/>The multi-tenant plugin uses a very simple messaging system from the falcone-util plugin. Whenever the tenantId changes, a message is published with the new and old tenantIds. You can use this event to perform any necessary checks, and clean up any resources you don't want around when the tenantId changes. Example as follows:
+{warn}<p class="paragraph"/><div class="code"><pre>//A sample class that might contain an authenticated user
+class AuthenticatedUser &#123;<p class="paragraph"/>    //Wire in the eventBroker bean &#45; <span class="java&#45;keyword">this</span> is where events are published from and subscribed to 
+    GroovyEventBroker eventBroker<p class="paragraph"/>    <span class="java&#45;keyword">public</span> AuthenticatedUser() &#123;<p class="paragraph"/>        //Somewhere in your code, subscribe to the tenantChanged event 
+        //Call subscribe method on eventBroker, provide a closure as an event handler<p class="paragraph"/>        eventBroker.subscribe(<span class="java&#45;quote">"tenantChanged"</span>) &#123; event, broker &#45;&#62; 
+            <span class="java&#45;keyword">if</span>(<span class="java&#45;keyword">this</span>.tenantId != event.newTenantId) &#123; 
+                <span class="java&#45;keyword">this</span>.logout() 
+            &#125;
+        &#125;
+    &#125;
+&#125;</pre></div><h2><a name="3.2 Acegi Resolver Set Up">3.2 Acegi Resolver Set Up</a></h2>To make the multi-tenant plugin work with acegi, you have to install an additional plugin<p class="paragraph"/><div class="code"><pre>grails install&#45;plugin multi&#45;tenant&#45;acegi</pre></div><p class="paragraph"/><h2> Config.groovy</h2><p class="paragraph"/>Your tenant resolver property should look like this:<p class="paragraph"/><div class="code"><pre>tenant &#123;
+    resolver.type = <span class="java&#45;quote">"acegi"</span>
+&#125;</pre></div><p class="paragraph"/><h2>User domain class</h2><p class="paragraph"/>Whichever User domain class you are using with the acegi plugin should have a property on it called "userTenantId". You will have to manually set this value for each user correctly. Note that you should not annotate your User domain class with <code>MultiTenant.<p class="paragraph"/><h2>Role and Requestmap domain class</h2><p class="paragraph"/>Note that Role and Requestmap domain classes will keep annotated with </code>MultiTenant, the same as the other domain classes. <h2><a name="3.3 Custom Tenant Resolver">3.3 Custom Tenant Resolver</a></h2>If the domain-name based approach doesn't work for you, you can implement your own TenantResolver by implementing the TenantResolver interface and then adding that class to your spring config:<p class="paragraph"/><div class="code"><pre>beans &#123;
+    //Make sure to <span class="java&#45;keyword">import</span>!
+    tenantResolver(MyCustomTenantResolver)
+&#125;</pre></div><h2><a name="3.4 Manually changing tenant">3.4 Manually changing tenant</a></h2>Occasionally, you will need to perform data operations for a specific tenant. For example, if you have a signup form on your website and you need to create a bunch of default records for the new tenant. There is a utility class you can use to execute a block of code for a specific tenant:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> grails.plugin.multitenant.core.util.TenantUtils<p class="paragraph"/>...<p class="paragraph"/>//Everything in the following block will be applied to tenantId=15
+TenantUtils.doWithTenant(15) &#123;
+  Contact c = <span class="java&#45;keyword">new</span> Contact(firstName:<span class="java&#45;quote">"Bob"</span>)
+  c.save() //This record will be saved to tenantId=15
+&#125;<p class="paragraph"/>//Now the tenantId will be set back to what it was before<p class="paragraph"/>...</pre></div><h2><a name="3.5 Tenant Status Checker">3.5 Tenant Status Checker</a></h2>You will probably want a way to verify that each tenant has access to their application. If you add a bean to spring named "tenantStatusChecker" that implements the "TenantStatusChecker" interface grails.plugin.multitenant.core.TenantStatusChecker, then this plugin will automatically validate each request and redirect to /noaccess.gsp if the tenant doesn't have access.<p class="paragraph"/>This is pretty clunky and we have plans to make it much better in the future&#8230;
+    </body>
+</html>

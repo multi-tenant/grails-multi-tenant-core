@@ -1,0 +1,6 @@
+grails.plugin.multitenant.core
+grails.plugin.multitenant.core.datasource
+grails.plugin.multitenant.core.event
+grails.plugin.multitenant.core.groovy.compiler
+grails.plugin.multitenant.core.spring
+grails.plugin.multitenant.core.util.log.log

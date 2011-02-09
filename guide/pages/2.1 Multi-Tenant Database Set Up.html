@@ -1,0 +1,10 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>2.1 Multi-Tenant Database Set Up</title>
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
+    </head>
+    <body class="body">
+    <h2>Annotate Domain Classes</h2><p class="paragraph"/>As of 0.10, you only have to annotate domain classes that you want to be multi-tenant. Any domain classes that you want to be shared, such as acegi Role/Requestmap can be left without the annotation.<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> grails.plugin.multitenant.core.groovy.compiler.MultiTenant;<p class="paragraph"/>@MultiTenant class MyDomainClass &#123;<p class="paragraph"/>&#125;</pre></div><p class="paragraph"/>Because the plugin hooks into the compiler, make sure to do a "grails clean" after you've annotated your classes. Eventually, we'd like to get rid of this step.<p class="paragraph"/><h2>A note on indexing in multi-tenant environment</h2><p class="paragraph"/>Indexing a multi-tenant database is a tricky beast. If you have large datasets (100MM-1BB), prepare yourself for some fun. Google multi-tenant databases and start reading. :)<p class="paragraph"/>The short of it is that it's probably most efficient to create multi-column indexes that always include tenantId, that way the db can limit the working set to a single tenant before it starts filtering on another field.
+    </body>
+</html>

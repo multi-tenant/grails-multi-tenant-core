@@ -1,0 +1,12 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>2. Multi-Tenant Modes</title>
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
+    </head>
+    <body class="body">
+    The webapp always runs in multi-tenant mode, but you have the choice on how your database will operate. You can choose either one database per customer (single-tenant), or one database for all customers (multi-tenant).<p class="paragraph"/>In Config.groovy, add the following section:<p class="paragraph"/><div class="code"><pre>tenant &#123;
+    mode = <span class="java&#45;quote">"singleTenant"</span> // OR <span class="java&#45;quote">"multiTenant"</span>
+&#125;</pre></div><p class="paragraph"/>{warn}multiTenant is the default{warn}
+    </body>
+</html>

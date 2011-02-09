@@ -1,0 +1,14 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>3.4 Manually changing tenant</title>
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen" title="Ref" charset="utf-8"/>
+    </head>
+    <body class="body">
+    Occasionally, you will need to perform data operations for a specific tenant. For example, if you have a signup form on your website and you need to create a bunch of default records for the new tenant. There is a utility class you can use to execute a block of code for a specific tenant:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> grails.plugin.multitenant.core.util.TenantUtils<p class="paragraph"/>...<p class="paragraph"/>//Everything in the following block will be applied to tenantId=15
+TenantUtils.doWithTenant(15) &#123;
+  Contact c = <span class="java&#45;keyword">new</span> Contact(firstName:<span class="java&#45;quote">"Bob"</span>)
+  c.save() //This record will be saved to tenantId=15
+&#125;<p class="paragraph"/>//Now the tenantId will be set back to what it was before<p class="paragraph"/>...</pre></div>
+    </body>
+</html>
