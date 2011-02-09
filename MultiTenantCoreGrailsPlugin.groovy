@@ -111,35 +111,30 @@ class MultiTenantCoreGrailsPlugin
     }
   }
 
-  def doWithEvents = {
-    ctx ->
-    if (ConfigurationHolder.config.tenant.mode != "singleTenant")
-    {
+    def doWithEvents = { ctx ->
+	
+        if (ConfigurationHolder.config.tenant.mode != "singleTenant") {
 
-      //Listen for criteria created events
-      hibernate.criteriaCreated("tenantFilter") {
-        CriteriaContext context ->
-        boolean hasAnnotation = TenantUtils.isAnnotated(context.entityClass)
-        if (context.entityClass == null || hasAnnotation)
-        {
-          final Integer tenant = ctx.currentTenant.get();
-          context.criteria.add(Expression.eq("tenantId", tenant));
-        }
-      }
+            //Listen for criteria created events
+            hibernate.criteriaCreated("tenantFilter") { CriteriaContext context ->
 
-      //Listen for query created events
-      hibernate.queryCreated("tenantFilter") {
-        Query query ->
-        for (String param: query.getNamedParameters())
-        {
-          if ("tenantId".equals(param))
-          {
-            query.setParameter("tenantId", ctx.currentTenant.get(), new IntegerType());
-          }
+                boolean hasAnnotation = TenantUtils.isAnnotated(context.entityClass)
+                if (context.entityClass == null || hasAnnotation) {
+                    final Integer tenant = ctx.currentTenant.get()
+                    context.criteria.add(Expression.eq("tenantId", tenant))
+                }
+            }
+
+            //Listen for query created events
+            hibernate.queryCreated("tenantFilter") { Query query ->
+                for (String param: query.getNamedParameters()) {
+                    if ("tenantId".equals(param)) {
+                        query.setParameter("tenantId", ctx.currentTenant.get(), new IntegerType());
+                    }
+                }
+            }
         }
-      }
     }
-  }
 
     def doWithApplicationContext = { GrailsApplicationContext applicationContext ->
     
