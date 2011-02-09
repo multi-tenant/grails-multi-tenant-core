@@ -30,91 +30,89 @@ import grails.plugin.multitenant.core.datasource.DatabaseDatasourceUrlResolver
 import com.infusion.util.domain.event.hibernate.CriteriaContext
 
 class MultiTenantCoreGrailsPlugin {
-	
-  def version = "1.0.4"
-  def grailsVersion = "1.3.0 > *"
-  def dependsOn = [falconeUtil: "1.0"]
-  def author = "Eric Martineau, Scott Ryan"
-  def authorEmail = "ericm@infusionsoft.com, scryan@codehaus.org"
-  def title = "Multi-Tenant Plugin(Core)"
-  def documentation = "http://multi-tenant.github.com/grails-multi-tenant-core"
-  def description = ''' Allows for managing data for mutiple 'tenants' in a single database by using a tenantId column
+    
+    def version = "1.0.4"
+    def grailsVersion = "1.3.0 > *"
+    def dependsOn = [falconeUtil: "1.0"]
+    def author = "Eric Martineau, Scott Ryan"
+    def authorEmail = "ericm@infusionsoft.com, scryan@codehaus.org"
+    def title = "Multi-Tenant Plugin(Core)"
+    def documentation = "http://multi-tenant.github.com/grails-multi-tenant-core"
+    def description = ''' Allows for managing data for mutiple 'tenants' in a single database by using a tenantId column
                           for each domain object.  Also handles the proxying of spring beans for a multi-tenant environment. '''
 
-  def doWithSpring = {
-    def requestResolverType = ConfigHelper.get("config") {it.tenant.resolver.request.dns.type}
-    //Utility class that contains tenant resolver
-    tenantUtils(TenantUtils) {
-      currentTenant = ref("currentTenant")
-    }
-    if (ConfigurationHolder.config.tenant.mode == "singleTenant")
-    {
-
-      //Put switching datasource here
-      tenantDataSourcePostProcessor(TenantDataSourcePostProcessor)
-      if (
-        ConfigurationHolder.config.tenant.datasourceResolver.type == "config" ||
-                ConfigurationHolder.config.tenant.datasourceResolver.type.size() == 0
-      )
-      {
-
-        dataSourceUrlResolver(PropertyDataSourceUrlResolver)
-
-      } else
-      {
-
-        dataSourceUrlResolver(DatabaseDatasourceUrlResolver) {
-          eventBroker = ref("eventBroker")
+    def doWithSpring = {
+    
+        def requestResolverType = ConfigHelper.get("config") {
+            it.tenant.resolver.request.dns.type
         }
-      }
 
-    } else
-    {
-
-      //This registers hibernate events that force filtering on domain classes
-      //In single tenant mode, the records are automatically filtered by different
-      //data sources.
-      tenantEventHandler(TenantEventHandler) {
-        sessionFactory = ref("sessionFactory")
-        currentTenant = ref("currentTenant")
-      }
-    }
-    //Bean container for all multi-tenant beans
-    tenantBeanContainer(TenantBeanContainer) {
-      currentTenant = ref("currentTenant")
-    }
-
-    //The post-processor does bean modification for multi-tenant beans
-    tenantBeanFactoryPostProcessor(TenantBeanFactoryPostProcessor)
-
-    def resolverType = ConfigHelper.get("request") {it.tenant.resolver.type}
-    if (resolverType == "request")
-    {
-      //This implementation
-      currentTenant(CurrentTenantThreadLocal) {
-        eventBroker = ref("eventBroker")
-      }
-
-
-      if (requestResolverType == "config")
-      {
-        //Default tenant resolver is a property file.  This can be easily overridden
-        tenantResolver(DomainNamePropertyTenantResolver)
-      } else if (ConfigurationHolder.config.tenant.resolver.request.dns.type == "db")
-      {
-        tenantResolver(DomainNameDatabaseTenantResolver) {
-          eventBroker = ref("eventBroker")
+        //Utility class that contains tenant resolver
+        tenantUtils(TenantUtils) {
+            currentTenant = ref("currentTenant")
         }
-      }
-    }
+        
+        if (ConfigurationHolder.config.tenant.mode == "singleTenant") {
 
-    //This bean adds the current tenantId to all logs
-    multiTenantLogLayout(MultiTenantLogLayout) {
+            //Put switching datasource here
+            tenantDataSourcePostProcessor(TenantDataSourcePostProcessor)
+            if (ConfigurationHolder.config.tenant.datasourceResolver.type == "config" ||
+                ConfigurationHolder.config.tenant.datasourceResolver.type.size() == 0) {
+
+                dataSourceUrlResolver(PropertyDataSourceUrlResolver)
+            } else {
+
+                dataSourceUrlResolver(DatabaseDatasourceUrlResolver) {
+                      eventBroker = ref("eventBroker")
+                }
+            } 
+        } else {
+
+            //This registers hibernate events that force filtering on domain classes
+            //In single tenant mode, the records are automatically filtered by different
+            //data sources.
+            tenantEventHandler(TenantEventHandler) {
+                sessionFactory = ref("sessionFactory")
+                currentTenant = ref("currentTenant")
+            }
+        }
+        
+        //Bean container for all multi-tenant beans
+        tenantBeanContainer(TenantBeanContainer) {
+            currentTenant = ref("currentTenant")
+        }
+
+        //The post-processor does bean modification for multi-tenant beans
+        tenantBeanFactoryPostProcessor(TenantBeanFactoryPostProcessor)
+
+        def resolverType = ConfigHelper.get("request") {
+            it.tenant.resolver.type
+        }
+        
+        if (resolverType == "request") {
+            //This implementation
+            currentTenant(CurrentTenantThreadLocal) {
+                eventBroker = ref("eventBroker")
+            }
+
+            if (requestResolverType == "config") {
+
+                //Default tenant resolver is a property file.  This can be easily overridden
+                tenantResolver(DomainNamePropertyTenantResolver)
+
+            } else if (ConfigurationHolder.config.tenant.resolver.request.dns.type == "db") {
+                tenantResolver(DomainNameDatabaseTenantResolver) {
+                    eventBroker = ref("eventBroker")
+                }
+            }
+        }
+
+        //This bean adds the current tenantId to all logs
+        multiTenantLogLayout(MultiTenantLogLayout) { }
     }
-  }
 
     def doWithEvents = { ctx ->
-	
+    
         if (ConfigurationHolder.config.tenant.mode != "singleTenant") {
 
             //Listen for criteria created events
@@ -157,7 +155,7 @@ class MultiTenantCoreGrailsPlugin {
     }
 
     def doWithWebDescriptor = { xml ->
-	
+    
         def resolverFromConfig = ConfigHelper.get("request") {
             it.tenant.resolver.type
         }
@@ -210,7 +208,7 @@ class MultiTenantCoreGrailsPlugin {
     }
 
     def doWithDynamicMethods = { ctx ->
-	
+    
         if (ConfigurationHolder.config.tenant.mode != "singleTenant") {
 
             //Add a nullable contraint for tenantId.
