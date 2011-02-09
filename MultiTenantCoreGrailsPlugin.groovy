@@ -208,22 +208,23 @@ class MultiTenantCoreGrailsPlugin
     }
   }
 
-  def doWithDynamicMethods = {ctx ->
+    def doWithDynamicMethods = { ctx ->
+	
+        if (ConfigurationHolder.config.tenant.mode != "singleTenant") {
 
-    if (ConfigurationHolder.config.tenant.mode != "singleTenant")
-    {
-      //Add a nullable contraint for tenantId.
-      application.domainClasses.each {DefaultGrailsDomainClass domainClass ->
-        domainClass.constraints?.get("tenantId")?.applyConstraint(ConstrainedProperty.NULLABLE_CONSTRAINT, true);
-        domainClass.clazz.metaClass.beforeInsert = {
-          if (delegate.respondsTo("tenantId") && tenantId == null)
-          { tenantId = 0 }
+            //Add a nullable contraint for tenantId.
+            application.domainClasses.each {DefaultGrailsDomainClass domainClass ->
+
+                domainClass.constraints?.get("tenantId")?.applyConstraint(ConstrainedProperty.NULLABLE_CONSTRAINT, true);
+                domainClass.clazz.metaClass.beforeInsert = {
+                    if (delegate.respondsTo("tenantId") && tenantId == null) {
+                        tenantId = 0 
+                    }
+                }
+            }
         }
-      }
+
+        TenantUtils.ready = true
     }
-
-    TenantUtils.ready = true
-  }
-
 
 }
