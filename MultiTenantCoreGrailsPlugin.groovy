@@ -1,34 +1,36 @@
+import util.ConfigHelper
+
+import org.apache.log4j.Logger
+import org.apache.log4j.Appender
+
+import org.hibernate.Query
+import org.hibernate.type.IntegerType
+import org.hibernate.criterion.Expression
+
+import org.codehaus.groovy.grails.plugins.GrailsPlugin
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import org.codehaus.groovy.grails.validation.ConstrainedProperty
+import org.codehaus.groovy.grails.commons.DefaultGrailsDomainClass
+import org.codehaus.groovy.grails.plugins.DefaultGrailsPluginManager
+import org.codehaus.groovy.grails.commons.spring.GrailsApplicationContext
+
+import grails.plugin.multitenant.core.util.TenantUtils
+import grails.plugin.multitenant.core.MultiTenantFilter
 import grails.plugin.multitenant.core.CurrentTenantThreadLocal
+import grails.plugin.multitenant.core.spring.TenantBeanContainer
+import grails.plugin.multitenant.core.hibernate.TenantEventHandler
 import grails.plugin.multitenant.core.DomainNameDatabaseTenantResolver
 import grails.plugin.multitenant.core.DomainNamePropertyTenantResolver
+import grails.plugin.multitenant.core.util.log.log.MultiTenantLogLayout
+import grails.plugin.multitenant.core.spring.TenantBeanFactoryPostProcessor
 import grails.plugin.multitenant.core.datasource.PropertyDataSourceUrlResolver
 import grails.plugin.multitenant.core.datasource.TenantDataSourcePostProcessor
-import grails.plugin.multitenant.core.hibernate.TenantEventHandler
-import grails.plugin.multitenant.core.spring.TenantBeanContainer
-import grails.plugin.multitenant.core.MultiTenantFilter
-import grails.plugin.multitenant.core.spring.TenantBeanFactoryPostProcessor
-import grails.plugin.multitenant.core.util.TenantUtils
-import com.infusion.util.domain.event.hibernate.CriteriaContext
-import grails.plugin.multitenant.core.util.log.log.MultiTenantLogLayout
-import org.apache.log4j.Appender
-import org.apache.log4j.Logger
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
-import org.codehaus.groovy.grails.commons.DefaultGrailsDomainClass
-import org.codehaus.groovy.grails.commons.spring.GrailsApplicationContext
-import org.codehaus.groovy.grails.validation.ConstrainedProperty
-import org.hibernate.Query
-import org.hibernate.criterion.Expression
-import org.hibernate.type.IntegerType
 import grails.plugin.multitenant.core.datasource.DatabaseDatasourceUrlResolver
-import util.ConfigHelper
-import org.codehaus.groovy.grails.plugins.GrailsPlugin
-import org.codehaus.groovy.grails.plugins.DefaultGrailsPluginManager
-import grails.plugin.multitenant.core.DomainNameDatabaseTenantResolver
-import grails.plugin.multitenant.core.DomainNamePropertyTenantResolver
-import grails.plugin.multitenant.core.CurrentTenantThreadLocal
 
-class MultiTenantCoreGrailsPlugin
-{
+import com.infusion.util.domain.event.hibernate.CriteriaContext
+
+class MultiTenantCoreGrailsPlugin {
+	
   def version = "1.0.4"
   def grailsVersion = "1.3.0 > *"
   def dependsOn = [falconeUtil: "1.0"]
