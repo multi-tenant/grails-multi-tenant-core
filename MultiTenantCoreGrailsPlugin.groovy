@@ -157,56 +157,58 @@ class MultiTenantCoreGrailsPlugin
     }
   }
 
-  def doWithWebDescriptor = {xml ->
-    def resolverFromConfig = ConfigHelper.get("request") {it.tenant.resolver.type}
-    if (resolverFromConfig == "request")
-    {
-
-      //Add filter definition to web.xml
-      def filterElements = xml.'filter'[0]
-      filterElements + {
-        'filter' {
-          'filter-name'("MultiTenantFilter")
-          'filter-class'(MultiTenantFilter.class.getName())
+    def doWithWebDescriptor = { xml ->
+	
+        def resolverFromConfig = ConfigHelper.get("request") {
+            it.tenant.resolver.type
         }
-      }
 
-      //This is what we'll be adding filter mappings to
-      def filterMappingElements = xml.'filter-mapping'[0]
+        if (resolverFromConfig == "request") {
 
-      //Look in plugins for urls patterns
-      DefaultGrailsPluginManager grailsManager = (DefaultGrailsPluginManager) manager;
-      grailsManager.getAllPlugins().each {
-        GrailsPlugin plugin ->
-        if (plugin.getInstance().getProperties().containsKey("multiTenantFilterUrls"))
-        {
-          List urls = plugin.getInstance().multiTenantFilterUrls
-          urls.each {url ->
-            log.info "Adding ${url} to multitenant request filter mappings from ${plugin}"
-            filterMappingElements + {
-              'filter-mapping' {
-                'filter-name'("MultiTenantFilter")
-                'url-pattern'("${url}")
-              }
+            //Add filter definition to web.xml
+            def filterElements = xml.'filter'[0]
+            filterElements + {
+                'filter' {
+                    'filter-name'("MultiTenantFilter")
+                    'filter-class'(MultiTenantFilter.class.getName())
+                }
             }
-          }
-        }
-      }
 
-      def urls = ConfigHelper.get(null) {it.tenant.filterUrls}
-      urls?.each {url ->
-        log.info "Adding ${url} to multitenant request mappings from Config.groovy"
-        filterMappingElements + {
-          'filter-mapping' {
-            'filter-name'("MultiTenantFilter")
-            'url-pattern'("${url}")
-          }
-        }
-      }
+            //This is what we'll be adding filter mappings to
+            def filterMappingElements = xml.'filter-mapping'[0]
 
-      log.info "Finished mapping filter urls"
+            //Look in plugins for urls patterns
+            DefaultGrailsPluginManager grailsManager = (DefaultGrailsPluginManager) manager
+            grailsManager.getAllPlugins().each { GrailsPlugin plugin ->
+                
+                if (plugin.getInstance().getProperties().containsKey("multiTenantFilterUrls")) {
+                    List urls = plugin.getInstance().multiTenantFilterUrls
+                    urls.each { url ->
+                        log.info "Adding ${url} to multitenant request filter mappings from ${plugin}"
+                        filterMappingElements + {
+                            'filter-mapping' {
+                                'filter-name'("MultiTenantFilter")
+                                'url-pattern'("${url}")
+                            }
+                        }
+                    }
+                }
+            }
+
+            def urls = ConfigHelper.get(null) {it.tenant.filterUrls}
+            urls?.each { url ->
+                log.info "Adding ${url} to multitenant request mappings from Config.groovy"
+                filterMappingElements + {
+                    'filter-mapping' {
+                        'filter-name'("MultiTenantFilter")
+                        'url-pattern'("${url}")
+                    }
+                }
+            }
+
+            log.info "Finished mapping filter urls"
+        }
     }
-  }
 
     def doWithDynamicMethods = { ctx ->
 	
