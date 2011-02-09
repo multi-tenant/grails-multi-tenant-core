@@ -35,10 +35,10 @@ class MultiTenantCoreGrailsPlugin
   def author = "Eric Martineau, Scott Ryan"
   def authorEmail = "ericm@infusionsoft.com, scryan@codehaus.org"
   def title = "Multi-Tenant Plugin(Core)"
+  def documentation = "http://multi-tenant.github.com/grails-multi-tenant-core"
   def description = ''' Allows for managing data for mutiple 'tenants' in a single database by using a tenantId column
                           for each domain object.  Also handles the proxying of spring beans for a multi-tenant environment. '''
-  // URL to the plugin's documentation
-  def documentation = "http://grails.org/multi-tenant-core"
+
   def doWithSpring = {
     def requestResolverType = ConfigHelper.get("config") {it.tenant.resolver.request.dns.type}
     //Utility class that contains tenant resolver
