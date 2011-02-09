@@ -141,21 +141,23 @@ class MultiTenantCoreGrailsPlugin
     }
   }
 
-  def doWithApplicationContext = {GrailsApplicationContext applicationContext ->
-    def logValue = ConfigHelper.get(true) {it.tenant.log}
-    if (logValue)
-    {
-      log.info "Setting up multi-tenant logging format"
-      Enumeration<Appender> appenders = Logger.getRootLogger().getAllAppenders()
-      if (appenders != null)
-      {
-        while (appenders.hasMoreElements())
-        {
-          appenders.nextElement().setLayout(applicationContext.multiTenantLogLayout)
+    def doWithApplicationContext = { GrailsApplicationContext applicationContext ->
+    
+        def logValue = ConfigHelper.get(true) {
+            it.tenant.log
         }
-      }
+
+        if (logValue) {
+
+            log.info "Setting up multi-tenant logging format"
+            Enumeration<Appender> appenders = Logger.getRootLogger().getAllAppenders()
+            if (appenders != null) {
+                while (appenders.hasMoreElements()) {
+                    appenders.nextElement().setLayout(applicationContext.multiTenantLogLayout)
+                }
+            }
+        }
     }
-  }
 
     def doWithWebDescriptor = { xml ->
 	
