@@ -1,0 +1,5 @@
+h3. A note on indexing in multi-tenant environment
+
+Indexing a multi-tenant database is a tricky beast. If you have large datasets (100MM-1BB), prepare yourself for some fun. Google 'multi-tenant databases' and start reading. :)
+
+The short of it is that it's probably most efficient to create multi-column indexes that always include tenantId, that way the db can limit the working set to a single tenant before it starts filtering on another field.

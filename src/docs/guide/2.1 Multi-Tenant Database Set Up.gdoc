@@ -1,19 +1,28 @@
-h2. Annotate Domain Classes
+The 'multiTenant' mode relies your application to use just one database for all tenants running. This is useful when you have a SaaS that allows user to sign up online and have their tenants running just after signing up. This is the simpler approach on multi-tenancy. 
 
-As of 0.10, you only have to annotate domain classes that you want to be multi-tenant. Any domain classes that you want to be shared, such as acegi Role/Requestmap can be left without the annotation.
+First thing to do, is to tell the plugin witch classes will be treated as multi-tenant ones. You can do it, but annotating your domain classes with the *@MultiTenant* annotation, as show below:
 
 {code}
-import grails.plugin.multitenant.core.groovy.compiler.MultiTenant;
+import grails.plugin.multitenant.core.groovy.compiler.MultiTenant
 
-@MultiTenant class MyDomainClass {
+@MultiTenant
+class MyDomainClass {
 
 }
 {code}
 
-Because the plugin hooks into the compiler, make sure to do a "grails clean" after you've annotated your classes. Eventually, we'd like to get rid of this step. 
+This way, each instance of MyDomainClass will belong to some tenant. To achieve this, the plugin hooks into all hibernate events that query your database, adding another condition in your queries that will filter just instances of the current tenant.
 
-h2. A note on indexing in multi-tenant environment
+For example, imagine you have 2 tenants, each one with 2 instances of MyDomainClass. When the app is running on tenant 1, calling 
 
-Indexing a multi-tenant database is a tricky beast. If you have large datasets (100MM-1BB), prepare yourself for some fun. Google multi-tenant databases and start reading. :)
+{code}
+def lst = MyDomainClass.list()
+{code}
 
-The short of it is that it's probably most efficient to create multi-column indexes that always include tenantId, that way the db can limit the working set to a single tenant before it starts filtering on another field.
+will return just its 2 instances, even if you have 4 in your database.
+
+The plugin hooks either on save/update events, setting the value of tenantId property automagically.
+
+{warning}
+You don't need to declare the 'tenantId' property, the plugin even auto-inject it for you, so, keep your domain class code clean
+{warning}
