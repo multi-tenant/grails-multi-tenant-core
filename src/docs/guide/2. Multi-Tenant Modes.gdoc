@@ -8,4 +8,4 @@ tenant {
 }
 {code}
 
-{warn}multiTenant is the default{warn}
+{warning}multiTenant is the default{warning}

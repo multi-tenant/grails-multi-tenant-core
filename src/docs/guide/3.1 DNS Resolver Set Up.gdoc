@@ -39,13 +39,13 @@ grails create-dns-map
 
 h2. Security and TenantId
 
-{warn}
+{warning}
 One advantage of identifying tenants by domain name is that any session cookies will be unique per domain, helping with security. This means that if a user authenticates (and gets an authentication cookie), if he changes the domain he's using to access the application, he won't stay logged on because the cookie for the old domain won't apply.
 
 This does have a loophole, though. Because the cookie lives on the client browser, it may be possible for the user to inspect the cookie, and copy any values such as jsessionid to a cookie for a different domain, thus gaining access to another tenant's data. It really depends on how secure your cookie is (does an authentication token only work for one domain?)
 
 The multi-tenant plugin uses a very simple messaging system from the falcone-util plugin. Whenever the tenantId changes, a message is published with the new and old tenantIds. You can use this event to perform any necessary checks, and clean up any resources you don't want around when the tenantId changes. Example as follows:
-{warn}
+{warning}
 
 {code}
 //A sample class that might contain an authenticated user
