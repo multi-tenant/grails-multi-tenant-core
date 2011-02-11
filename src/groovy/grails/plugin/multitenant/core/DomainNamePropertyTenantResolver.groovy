@@ -8,16 +8,16 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
  * least the following keys:
  * fullservername = mapped_tenant_id
  */
-public class DomainNamePropertyTenantResolver extends BaseDomainNameTenantResolver {
-
-    /**
-     * This will clear out the current list of tenants and load the most current copy form the data in the configuration
-     * file.
-     */
-  
-    public void initialize() {
-        hosts.clear();
-        Map domainTenants = ConfigurationHolder.config.tenant.domainTenantMap.flatten()
-        hosts.putAll(domainTenants)
-    }
+public class DomainNamePropertyTenantResolver extends BaseDomainNameTenantResolver
+{
+  /**
+   * This will clear out the current list of tenants and load the most current copy form the data in the configuration
+   * file.
+   */
+  public void initialize()
+  {
+    hosts.clear();
+    Map domainTenants = ConfigurationHolder.config.tenant.domainTenantMap.flatten()
+    hosts.putAll(domainTenants);
+  }
 }

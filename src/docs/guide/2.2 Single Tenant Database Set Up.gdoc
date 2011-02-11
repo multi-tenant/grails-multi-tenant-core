@@ -1,10 +1,10 @@
 The single-tenant option is a little more immature than the multi-tenant option. It inherits all datasource configuration from the default datasource in Datasource.groovy, and allows you to provide a custom datasource url per tenant. This means that you can't mix and match drivers or user/pass combos for different tenants in the same instance.
 
-{warning}
+{warn}
 TenantUtils.doWithTenant and currentTenant.set() do not work in single tenant mode, unless you manually create a new hibernate session and bind it to the current thread.
 
 Also, normal second-level caches will not work in single-tenant mode, as you will get primary key collisions across databases. You'll need to use a multi-tenant wrapper for your cache implementation (see below)
-{warning}
+{warn}
 
 The plugin supports the following types of datasources: 
 
